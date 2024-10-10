@@ -48,6 +48,8 @@ jobs:
         dotnet-version: |
           6.0.x
           8.0.x
+          9.0.x
+        dotnet-quality: 'preview'
     - name: Show installed versions
       shell: pwsh
       run: |
@@ -105,7 +107,7 @@ jobs:
         Logging__LogLevel__Microsoft.EntityFrameworkCore.Database.Command: 'None'
         Logging__LogLevel__JsonApiDotNetCore: 'None'
       run: |
-        dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --logger "GitHubActions;summary.includeSkippedTests=true"
+        dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --logger "GitHubActions;summary.includeSkippedTests=true" -- xUnit.ParallelAlgorithm=conservative
     - name: Upload coverage to codecov.io
       if: matrix.os == 'ubuntu-latest'
       env:
@@ -166,6 +168,8 @@ jobs:
         dotnet-version: |
           6.0.x
           8.0.x
+          9.0.x
+        dotnet-quality: 'preview'
     - name: Git checkout
       uses: actions/checkout@v4
     - name: Restore tools
@@ -221,6 +225,8 @@ jobs:
         dotnet-version: |
           6.0.x
           8.0.x
+          9.0.x
+        dotnet-quality: 'preview'
     - name: Git checkout
       uses: actions/checkout@v4
       with:
