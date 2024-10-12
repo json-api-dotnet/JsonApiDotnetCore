@@ -23,7 +23,7 @@
     <NSwagApiClientVersion>14.1.*</NSwagApiClientVersion>
     <NewtonsoftJsonVersion>13.0.*</NewtonsoftJsonVersion>
     <SourceLinkVersion>8.0.*</SourceLinkVersion>
-    <SwashbuckleVersion>6.*-*</SwashbuckleVersion>
+    <SwashbuckleVersion>6.8.2-*</SwashbuckleVersion>
     <TestSdkVersion>17.11.*</TestSdkVersion>
     <XunitVersion>2.9.*</XunitVersion>
     <XunitVisualStudioVersion>2.8.*</XunitVisualStudioVersion>
@@ -34,6 +34,7 @@
     <EntityFrameworkCoreFrozenVersion>9.0.0-rtm.24508.5</EntityFrameworkCoreFrozenVersion>
 
     <!-- Non-published dependencies (these are safe to update, won't cause a breaking change) -->
+    <ApiDescriptionServerVersion>9.0.0-rc.2.24474.3</ApiDescriptionServerVersion>
     <AspNetCoreVersion>9.0.*-*</AspNetCoreVersion>
     <EntityFrameworkCoreVersion>$(EntityFrameworkCoreFrozenVersion)</EntityFrameworkCoreVersion>
     <EntityFrameworkCorePostgreSQLVersion>9.0.0-rc.2-ci.20240930T080442</EntityFrameworkCorePostgreSQLVersion>

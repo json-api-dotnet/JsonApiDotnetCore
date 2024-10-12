@@ -22,13 +22,8 @@ public sealed class ModelStateValidationTests : IClassFixture<OpenApiTestContext
 
         testContext.UseController<SocialMediaAccountsController>();
 
-        const string targetFramework =
-#if NET6_0
-            "net6.0";
-#else
-            "net8.0";
-#endif
-        testContext.SwaggerDocumentOutputDirectory = $"{GetType().Namespace!.Replace('.', '/')}/GeneratedSwagger/{targetFramework}";
+        testContext.SwaggerDocumentOutputDirectory =
+            $"{GetType().Namespace!.Replace('.', '/')}/GeneratedSwagger/net{Environment.Version.Major}.{Environment.Version.Minor}";
     }
 
     [Theory]

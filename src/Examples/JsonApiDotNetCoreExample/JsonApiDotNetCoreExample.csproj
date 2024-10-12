@@ -17,6 +17,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EntityFrameworkCoreVersion)" />
     <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="$(ApiDescriptionServerVersion)" PrivateAssets="all" />
+
+    <!-- Workaround for https://github.com/dotnet/aspnetcore/issues/58379 -->
+    <PackageReference Include="Microsoft.OpenApi" Version="1.6.17" />
+
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(EntityFrameworkCorePostgreSQLVersion)" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
   </ItemGroup>
