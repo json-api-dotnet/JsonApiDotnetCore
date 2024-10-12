@@ -5,6 +5,7 @@ version: '{build}'
 branches:
   only:
   - master
+  - openapi
   - /release\/.+/
 
 build: off

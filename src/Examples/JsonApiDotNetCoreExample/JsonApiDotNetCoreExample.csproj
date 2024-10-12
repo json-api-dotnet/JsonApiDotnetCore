@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFrameworks>net9.0;net8.0;net6.0</TargetFrameworks>
+    <OpenApiGenerateDocumentsOnBuild>true</OpenApiGenerateDocumentsOnBuild>
+    <OpenApiDocumentsDirectory>GeneratedSwagger</OpenApiDocumentsDirectory>
   </PropertyGroup>
 
   <Import Project="..\..\..\package-versions.props" />
@@ -9,10 +11,13 @@
     <ProjectReference Include="..\..\JsonApiDotNetCore\JsonApiDotNetCore.csproj" />
     <ProjectReference Include="..\..\JsonApiDotNetCore.SourceGenerators\JsonApiDotNetCore.SourceGenerators.csproj" OutputItemType="Analyzer"
       ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\JsonApiDotNetCore.OpenApi.Swashbuckle\JsonApiDotNetCore.OpenApi.Swashbuckle.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="$(EntityFrameworkCoreVersion)" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="$(ApiDescriptionServerVersion)" PrivateAssets="all" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="$(EntityFrameworkCorePostgreSQLVersion)" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
   </ItemGroup>
 </Project>
