@@ -26,9 +26,9 @@ namespace OpenApiKiotaEndToEndTests.ResourceInheritance.NoOperations.GeneratedCo
         }
 
         /// <summary>The openapiDiscriminator property</summary>
-        public string? OpenapiDiscriminator
+        public global::OpenApiKiotaEndToEndTests.ResourceInheritance.NoOperations.GeneratedCode.Models.ResourceType? OpenapiDiscriminator
         {
-            get { return BackingStore?.Get<string?>("openapi:discriminator"); }
+            get { return BackingStore?.Get<global::OpenApiKiotaEndToEndTests.ResourceInheritance.NoOperations.GeneratedCode.Models.ResourceType?>("openapi:discriminator"); }
             set { BackingStore?.Set("openapi:discriminator", value); }
         }
 
@@ -65,7 +65,7 @@ namespace OpenApiKiotaEndToEndTests.ResourceInheritance.NoOperations.GeneratedCo
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "lengthInMeters", n => { LengthInMeters = n.GetDoubleValue(); } },
-                { "openapi:discriminator", n => { OpenapiDiscriminator = n.GetStringValue(); } },
+                { "openapi:discriminator", n => { OpenapiDiscriminator = n.GetEnumValue<global::OpenApiKiotaEndToEndTests.ResourceInheritance.NoOperations.GeneratedCode.Models.ResourceType>(); } },
             };
         }
 
@@ -77,7 +77,7 @@ namespace OpenApiKiotaEndToEndTests.ResourceInheritance.NoOperations.GeneratedCo
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
             writer.WriteDoubleValue("lengthInMeters", LengthInMeters);
-            writer.WriteStringValue("openapi:discriminator", OpenapiDiscriminator);
+            writer.WriteEnumValue<global::OpenApiKiotaEndToEndTests.ResourceInheritance.NoOperations.GeneratedCode.Models.ResourceType>("openapi:discriminator", OpenapiDiscriminator);
         }
     }
 }

@@ -14398,7 +14398,11 @@
             "format": "int32"
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -14551,7 +14555,11 @@
             "format": "double"
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -14574,7 +14582,11 @@
             "format": "int32"
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -14668,7 +14680,11 @@
             "format": "int32"
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -14806,7 +14822,11 @@
             "format": "double"
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -14828,7 +14848,11 @@
             "format": "int32"
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -15160,7 +15184,11 @@
             "format": "int32"
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -15398,7 +15426,11 @@
         "type": "object",
         "properties": {
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -18253,7 +18285,11 @@
         "type": "object",
         "properties": {
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -18384,7 +18420,11 @@
         "type": "object",
         "properties": {
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -18410,7 +18450,11 @@
             ]
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -18469,7 +18513,11 @@
         "type": "object",
         "properties": {
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -18600,7 +18648,11 @@
         "type": "object",
         "properties": {
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -18625,7 +18677,11 @@
             ]
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -19234,7 +19290,11 @@
             "format": "double"
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -19463,7 +19523,11 @@
         "type": "object",
         "properties": {
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -19492,7 +19556,11 @@
             "format": "int32"
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -19743,7 +19811,11 @@
             ]
           },
           "openapi:discriminator": {
-            "type": "string"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
         "additionalProperties": false,

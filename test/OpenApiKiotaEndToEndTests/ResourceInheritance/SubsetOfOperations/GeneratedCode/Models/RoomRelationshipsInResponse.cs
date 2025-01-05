@@ -19,9 +19,9 @@ namespace OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.Gener
         public IBackingStore BackingStore { get; private set; }
 
         /// <summary>The openapiDiscriminator property</summary>
-        public string? OpenapiDiscriminator
+        public global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.GeneratedCode.Models.ResourceType? OpenapiDiscriminator
         {
-            get { return BackingStore?.Get<string?>("openapi:discriminator"); }
+            get { return BackingStore?.Get<global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.GeneratedCode.Models.ResourceType?>("openapi:discriminator"); }
             set { BackingStore?.Set("openapi:discriminator", value); }
         }
 
@@ -68,7 +68,7 @@ namespace OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.Gener
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "openapi:discriminator", n => { OpenapiDiscriminator = n.GetStringValue(); } },
+                { "openapi:discriminator", n => { OpenapiDiscriminator = n.GetEnumValue<global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.GeneratedCode.Models.ResourceType>(); } },
                 { "residence", n => { Residence = n.GetObjectValue<global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.GeneratedCode.Models.ToOneResidenceInResponse>(global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.GeneratedCode.Models.ToOneResidenceInResponse.CreateFromDiscriminatorValue); } },
             };
         }
@@ -80,7 +80,7 @@ namespace OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.Gener
         public virtual void Serialize(ISerializationWriter writer)
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("openapi:discriminator", OpenapiDiscriminator);
+            writer.WriteEnumValue<global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.GeneratedCode.Models.ResourceType>("openapi:discriminator", OpenapiDiscriminator);
             writer.WriteObjectValue<global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfOperations.GeneratedCode.Models.ToOneResidenceInResponse>("residence", Residence);
         }
     }
