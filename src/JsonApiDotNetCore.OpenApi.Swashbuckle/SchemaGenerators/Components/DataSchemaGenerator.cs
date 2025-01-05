@@ -325,7 +325,7 @@ internal sealed class DataSchemaGenerator
         }
     }
 
-    private static void SetFieldSchemaMembers(OpenApiSchema fullSchemaForData, ResourceSchemaType resourceSchemaType, bool forRequestSchema, bool forAttributes,
+    private void SetFieldSchemaMembers(OpenApiSchema fullSchemaForData, ResourceSchemaType resourceSchemaType, bool forRequestSchema, bool forAttributes,
         ResourceFieldSchemaBuilder fieldSchemaBuilder, SchemaRepository schemaRepository)
     {
         string propertyNameInSchema = forAttributes ? JsonApiPropertyName.Attributes : JsonApiPropertyName.Relationships;
@@ -355,7 +355,7 @@ internal sealed class DataSchemaGenerator
         {
             if (resourceSchemaType.ResourceType.BaseType == null)
             {
-                CreateFieldsDiscriminator(fullSchemaForFields);
+                CreateFieldsDiscriminator(fullSchemaForFields, schemaRepository);
             }
             else
             {
@@ -382,12 +382,12 @@ internal sealed class DataSchemaGenerator
         }
     }
 
-    private static void CreateFieldsDiscriminator(OpenApiSchema fullSchema)
+    private void CreateFieldsDiscriminator(OpenApiSchema fullSchema, SchemaRepository schemaRepository)
     {
-        fullSchema.Properties.Add(OpenApiMediaTypeExtension.FullyQualifiedOpenApiDiscriminatorPropertyName, new OpenApiSchema
-        {
-            Type = "string"
-        });
+        OpenApiSchema referenceSchemaForResourceType = _resourceTypeSchemaGenerator.GenerateSchema(schemaRepository);
+
+        fullSchema.Properties.Add(OpenApiMediaTypeExtension.FullyQualifiedOpenApiDiscriminatorPropertyName,
+            referenceSchemaForResourceType.WrapInExtendedSchema());
 
         fullSchema.Required.Add(OpenApiMediaTypeExtension.FullyQualifiedOpenApiDiscriminatorPropertyName);
 
@@ -410,7 +410,7 @@ internal sealed class DataSchemaGenerator
         return propertyInfo.PropertyType;
     }
 
-    private static void MapFieldsInDiscriminator(Type schemaType, ResourceType resourceType, SchemaRepository schemaRepository)
+    private void MapFieldsInDiscriminator(Type schemaType, ResourceType resourceType, SchemaRepository schemaRepository)
     {
         OpenApiSchema referenceSchemaForDerived = schemaRepository.LookupByType(schemaType);
         ResourceType ultimateBaseResourceType = GetUltimateBaseType(resourceType);
@@ -418,7 +418,11 @@ internal sealed class DataSchemaGenerator
 
         OpenApiSchema referenceSchemaForUltimateBase = schemaRepository.LookupByType(ultimateBaseSchemaType);
         OpenApiSchema fullSchemaForUltimateBase = schemaRepository.Schemas[referenceSchemaForUltimateBase.Reference.Id];
-        fullSchemaForUltimateBase.Discriminator.Mapping.Add(resourceType.PublicName, referenceSchemaForDerived.Reference.ReferenceV3);
+
+        if (fullSchemaForUltimateBase.Discriminator.Mapping.TryAdd(resourceType.PublicName, referenceSchemaForDerived.Reference.ReferenceV3))
+        {
+            MapResourceTypeInEnum(resourceType.PublicName, schemaRepository);
+        }
     }
 
     private void SetDocumentation(OpenApiSchema fullSchema, ResourceType resourceType)

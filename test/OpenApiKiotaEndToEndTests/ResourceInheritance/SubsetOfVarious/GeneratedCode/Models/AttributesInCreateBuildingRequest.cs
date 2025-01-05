@@ -19,9 +19,9 @@ namespace OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfVarious.Generate
         public IBackingStore BackingStore { get; private set; }
 
         /// <summary>The openapiDiscriminator property</summary>
-        public string? OpenapiDiscriminator
+        public global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfVarious.GeneratedCode.Models.ResourceType? OpenapiDiscriminator
         {
-            get { return BackingStore?.Get<string?>("openapi:discriminator"); }
+            get { return BackingStore?.Get<global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfVarious.GeneratedCode.Models.ResourceType?>("openapi:discriminator"); }
             set { BackingStore?.Set("openapi:discriminator", value); }
         }
 
@@ -66,7 +66,7 @@ namespace OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfVarious.Generate
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "openapi:discriminator", n => { OpenapiDiscriminator = n.GetStringValue(); } },
+                { "openapi:discriminator", n => { OpenapiDiscriminator = n.GetEnumValue<global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfVarious.GeneratedCode.Models.ResourceType>(); } },
                 { "surfaceInSquareMeters", n => { SurfaceInSquareMeters = n.GetIntValue(); } },
             };
         }
@@ -78,7 +78,7 @@ namespace OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfVarious.Generate
         public virtual void Serialize(ISerializationWriter writer)
         {
             _ = writer ?? throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("openapi:discriminator", OpenapiDiscriminator);
+            writer.WriteEnumValue<global::OpenApiKiotaEndToEndTests.ResourceInheritance.SubsetOfVarious.GeneratedCode.Models.ResourceType>("openapi:discriminator", OpenapiDiscriminator);
             writer.WriteIntValue("surfaceInSquareMeters", SurfaceInSquareMeters);
         }
     }
