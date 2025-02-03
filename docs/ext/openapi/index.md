@@ -2,11 +2,11 @@
 
 This extension facilitates using OpenAPI client generators targeting JSON:API documents.
 
-In JSON:API, a resource object contains the `type` member, which defines the structure of nested `attributes` and `relationships` objects.
-While OpenAPI supports such constraints using `allOf` inheritance with a discriminator property,
-it provides no way to express that it recursively applies to nested objects.
+In JSON:API, a resource object contains the `type` member, which defines the structure of nested [attributes](https://jsonapi.org/format/#document-resource-object-attributes) and [relationships](https://jsonapi.org/format/#document-resource-object-relationships) objects.
+While OpenAPI supports such constraints using `allOf` inheritance with a discriminator property for the `data` member,
+it provides no way to express that the discriminator recursively applies to nested objects.
 
-This extension addresses that limitation by allowing additional discriminator properties to guide code generation tools.
+This extension addresses that limitation by defining additional discriminator properties to guide code generation tools.
 
 ## URI
 
@@ -32,9 +32,9 @@ Content-Type: application/vnd.api+json; ext=openapi; ext=atomic
 ```
 
 > [!NOTE]
-> The JSON:API specification [forbids](https://jsonapi.org/format/#media-type-parameter-rules) the use of multiple `ext` parameters
-> and requires that each extension name must be a URI.
-> This extension permits to violate both constraints for practical reasons, to work around bugs in client generators that produce non-working code otherwise.
+> The [base specification](https://jsonapi.org/format/#media-type-parameter-rules) *forbids* the use of multiple `ext` parameters
+> and *requires* that each extension name must be a URI.
+> This extension relaxes both constraints for practical reasons, to workaround bugs in client generators that produce broken code otherwise.
 
 ## Namespace
 
@@ -50,9 +50,10 @@ including any members defined in the [Atomic Operations extension](https://jsona
 
 ### Resource Objects
 
-In addition to the members allowed by the base specification, the following member MAY be included in `atributes` and `relationships` members:
+In addition to the members allowed by the base specification, the following member MAY be included
+in [attributes](https://jsonapi.org/format/#document-resource-object-attributes) and [relationships](https://jsonapi.org/format/#document-resource-object-relationships) objects:
 
-* `openapi:discriminator` - A string to facilitate generation of client code.
+* `openapi:discriminator` - A string that MUST be identical to the `type` member in the containing [resource object](https://jsonapi.org/format/#document-resource-objects).
 
 Here's how an article (i.e. a resource of type "articles") might appear in a document:
 
@@ -77,7 +78,10 @@ Here's how an article (i.e. a resource of type "articles") might appear in a doc
 
 ### Atomic Operations
 
-When combined with the [Atomic Operations extension](https://jsonapi.org/ext/atomic/), the `openapi:discriminator` member MAY also be included in the elements of the `atomic:operations` array.
+In addition to the members allowed by the [Atomic Operations extension](https://jsonapi.org/ext/atomic/), 
+the following member MAY be included in elements of an `atomic:operations` array:
+
+* `openapi:discriminator` - A string to facilitate generation of client code.
 
 For example:
 
@@ -104,12 +108,20 @@ Accept: application/vnd.api+json; ext="https://www.jsonapi.net/ext/openapi https
 
 ## Processing
 
-A server MUST ignore all occurrences of the `openapi:discriminator` member anywhere in the document.
+A server MAY ignore the `openapi:discriminator` member in [attributes](https://jsonapi.org/format/#document-resource-object-attributes) and [relationships](https://jsonapi.org/format/#document-resource-object-relationships) objects from requests.
+A server SHOULD ignore the `openapi:discriminator` member in elements of an `atomic:operations` array.
 
-A server MUST include the `openapi:discriminator` member in `attributes` and `relationships` objects.
+A server MUST include the `openapi:discriminator` member in [attributes](https://jsonapi.org/format/#document-resource-object-attributes) and [relationships](https://jsonapi.org/format/#document-resource-object-relationships) objects in responses.
 The member value MUST be the same as the `type` member value of the containing resource object.
 
-A client MAY include the `openapi:discriminator` member in `atributes` and `relationships` objects.
-The member value SHOULD be the same as the `type` member value of the containing resource object.
+A client MAY include the `openapi:discriminator` member in [attributes](https://jsonapi.org/format/#document-resource-object-attributes) and [relationships](https://jsonapi.org/format/#document-resource-object-relationships) objects.
+The member value MUST be the same as the `type` member value of the containing resource object.
 
 A client MAY include the `openapi:discriminator` member in elements of an `atomic:operations` array.
+
+### Processing Errors
+
+A server SHOULD validate that the value of the `openapi:discriminator` member in
+[attributes](https://jsonapi.org/format/#document-resource-object-attributes) and [relationships](https://jsonapi.org/format/#document-resource-object-relationships) objects
+is identical to the `type` member in the containing resource object. When validation fails, the server MUST respond with a `409 Conflict`
+and SHOULD include a document with a top-level `errors` member that contains an error object.

@@ -336,44 +336,93 @@
   "components": {
     "schemas": {
       "attributesInCreateGameRequest": {
-        "required": [
-          "title"
-        ],
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
           },
-          "purchasePrice": {
-            "type": "number",
-            "format": "double"
+          {
+            "required": [
+              "title"
+            ],
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "purchasePrice": {
+                "type": "number",
+                "format": "double"
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "attributesInCreatePlayerGroupRequest": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
+          },
+          {
+            "required": [
+              "name"
+            ],
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "attributesInCreatePlayerRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
+          },
+          {
+            "required": [
+              "userName"
+            ],
+            "type": "object",
+            "properties": {
+              "userName": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "attributesInCreateRequest": {
         "required": [
-          "userName"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "userName": {
-            "type": "string"
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "games": "#/components/schemas/attributesInCreateGameRequest",
+            "playerGroups": "#/components/schemas/attributesInCreatePlayerGroupRequest",
+            "players": "#/components/schemas/attributesInCreatePlayerRequest"
+          }
+        },
+        "x-abstract": true
       },
       "createGameRequestDocument": {
         "required": [
@@ -1245,37 +1294,77 @@
         "additionalProperties": false
       },
       "relationshipsInCreatePlayerGroupRequest": {
-        "type": "object",
-        "properties": {
-          "players": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyPlayerInRequest"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInCreateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "players": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyPlayerInRequest"
+                  }
+                ]
               }
-            ]
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "relationshipsInCreatePlayerRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInCreateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "ownedGames": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyGameInRequest"
+                  }
+                ]
+              },
+              "memberOf": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyPlayerGroupInRequest"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "relationshipsInCreateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "ownedGames": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/toManyGameInRequest"
-              }
-            ]
-          },
-          "memberOf": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyPlayerGroupInRequest"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "playerGroups": "#/components/schemas/relationshipsInCreatePlayerGroupRequest",
+            "players": "#/components/schemas/relationshipsInCreatePlayerRequest"
+          }
+        },
+        "x-abstract": true
       },
       "resourceLinks": {
         "type": "object",

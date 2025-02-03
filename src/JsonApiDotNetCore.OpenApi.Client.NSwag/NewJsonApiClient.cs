@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace JsonApiDotNetCore.OpenApi.Client.NSwag;
 
@@ -42,18 +43,100 @@ public abstract class NewJsonApiClient
     {
         ArgumentNullException.ThrowIfNull(serializerSettings);
 
-        serializerSettings.Converters.Add(new PropertyTrackingConverter(this));
+        //serializerSettings.Converters.Insert(0, new PropertyTrackingWriteConverter(this));
+        //serializerSettings.Converters.Insert(0, new PropertyTrackingReadConverter(this));
+
+        //serializerSettings.Converters.Add(new PropertyTrackingReadConverter(this));
+        serializerSettings.Converters.Add(new PropertyTrackingWriteConverter(this));
+
+        //serializerSettings.ContractResolver = new JsonApiFieldContractResolver(this);
+        //serializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     }
 
-    private sealed class PropertyTrackingConverter : JsonConverter
+    private sealed class JsonApiFieldContractResolver : DefaultContractResolver
     {
-        private static readonly AsyncLocal<bool> IsDisabled = new();
+        private readonly NewJsonApiClient _apiClient;
+
+        public JsonApiFieldContractResolver(NewJsonApiClient apiClient)
+        {
+            ArgumentNullException.ThrowIfNull(apiClient);
+
+            _apiClient = apiClient;
+        }
+
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+        {
+            Console.WriteLine($"CreateProperty for {member.Name}");
+
+            JsonProperty jsonProperty = base.CreateProperty(member, memberSerialization);
+
+            if (member.ReflectedType != null && _apiClient._propertyStore.Keys.Any(containingType => containingType.GetType() == member.ReflectedType))
+            {
+                //jsonProperty.NullValueHandling = NullValueHandling.Include;
+                //jsonProperty.DefaultValueHandling = DefaultValueHandling.Include;
+            }
+
+            return jsonProperty;
+        }
+
+        protected override JsonConverter? ResolveContractConverter(Type objectType)
+        {
+            bool isTrackedType = _apiClient._propertyStore.Keys.Any(containingType => containingType.GetType() == objectType);
+
+            if (isTrackedType)
+            {
+                Console.WriteLine($"ResolveContractConverter for {objectType.Name} (tracked)");
+            }
+            else
+            {
+                Console.WriteLine($"ResolveContractConverter for {objectType.Name}");
+            }
+
+            /*if (_apiClient._propertyStore.Keys.Any(containingType => containingType.GetType() == objectType))
+            {
+                return new PropertyTrackingWriteConverter(_apiClient);
+            }*/
+
+            return base.ResolveContractConverter(objectType);
+        }
+    }
+
+    public sealed class AlwaysIncludeContractResolver : DefaultContractResolver
+    {
+        private readonly ISet<string> _properties;
+
+        public AlwaysIncludeContractResolver():this(new HashSet<string>()){}
+
+        public AlwaysIncludeContractResolver(ISet<string> properties)
+        {
+            ArgumentNullException.ThrowIfNull(properties);
+
+            _properties = properties;
+        }
+
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+        {
+            JsonProperty jsonProperty = base.CreateProperty(member, memberSerialization);
+
+            //if (_properties.Contains(member.Name))
+            {
+                jsonProperty.NullValueHandling = NullValueHandling.Include;
+                jsonProperty.DefaultValueHandling = DefaultValueHandling.Include;
+            }
+
+            return jsonProperty;
+        }
+    }
+
+    private sealed class PropertyTrackingWriteConverter : JsonConverter
+    {
+        private static readonly AsyncLocal<bool> IsWriting = new();
         private readonly NewJsonApiClient _apiClient;
 
         public override bool CanRead => false;
         public override bool CanWrite => true;
 
-        public PropertyTrackingConverter(NewJsonApiClient apiClient)
+        public PropertyTrackingWriteConverter(NewJsonApiClient apiClient)
         {
             ArgumentNullException.ThrowIfNull(apiClient);
 
@@ -62,7 +145,35 @@ public abstract class NewJsonApiClient
 
         public override bool CanConvert(Type objectType)
         {
-            return !IsDisabled.Value && _apiClient._propertyStore.Keys.Any(container => container.GetType() == objectType);
+            bool result;
+
+            if (IsWriting.Value)
+            {
+                IsWriting.Value = false;
+                result = false;
+            }
+            else
+            {
+                bool canConvert = _apiClient._propertyStore.Keys.Any(container => container.GetType() == objectType);
+                result = canConvert;
+            }
+
+            Console.WriteLine($"PropertyTrackingWriteConverter.CanConvert for {objectType.Name} => {result}");
+            return result;
+
+            //
+
+
+
+            /*if (IsDisabled.Value)
+            {
+                IsDisabled.Value = false;
+                return false;
+            }*/
+
+            //return canConvert;
+            //return true;
+            //return !IsDisabled.Value;
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
@@ -74,10 +185,20 @@ public abstract class NewJsonApiClient
         {
             try
             {
-                IsDisabled.Value = true;
+                IsWriting.Value = true;
+                //bool isObjectTracked = value is INotifyPropertyChanged container && _apiClient._propertyStore.TryGetValue(container, out ISet<string>? properties);
+                bool isObjectTracked = value is INotifyPropertyChanged container && _apiClient._propertyStore.ContainsKey(container);
 
-                if (value is INotifyPropertyChanged container && _apiClient._propertyStore.TryGetValue(container, out ISet<string>? properties))
+                Console.WriteLine($"PropertyTrackingWriteConverter.WriteJson for {(value != null ? value.GetType().Name : "null")}, isPropertyTracked={isObjectTracked})");
+
+                if (isObjectTracked)
                 {
+                    var backupContractResolver = serializer.ContractResolver;
+                    serializer.ContractResolver = new AlwaysIncludeContractResolver();
+                    serializer.Serialize(writer, value);
+                    serializer.ContractResolver = backupContractResolver;
+
+                    /*
                     writer.WriteStartObject();
 
                     foreach (string propertyName in properties)
@@ -92,6 +213,7 @@ public abstract class NewJsonApiClient
                     }
 
                     writer.WriteEndObject();
+                    */
                 }
                 else
                 {
@@ -100,7 +222,7 @@ public abstract class NewJsonApiClient
             }
             finally
             {
-                IsDisabled.Value = false;
+                IsWriting.Value = false;
             }
         }
     }

@@ -14,6 +14,18 @@ namespace JsonApiDotNetCore.OpenApi.Swashbuckle;
 
 internal sealed class ConfigureSwaggerGenOptions : IConfigureOptions<SwaggerGenOptions>
 {
+    private static readonly Dictionary<Type, Type> BaseToDerivedSchemaTypes = new()
+    {
+        [typeof(ResourceIdentifierInRequest)] = typeof(ResourceIdentifierInRequest<>),
+        [typeof(DataInCreateResourceRequest)] = typeof(DataInCreateResourceRequest<>),
+        //[typeof(AttributesInCreateResourceRequest)] = typeof(AttributesInCreateResourceRequest<>),
+        //[typeof(RelationshipsInCreateResourceRequest)] = typeof(RelationshipsInCreateResourceRequest<>),
+        [typeof(DataInUpdateResourceRequest)] = typeof(DataInUpdateResourceRequest<>),
+        //[typeof(AttributesInUpdateResourceRequest)] = typeof(AttributesInUpdateResourceRequest<>),
+        //[typeof(RelationshipsInUpdateResourceRequest)] = typeof(RelationshipsInUpdateResourceRequest<>),
+        [typeof(ResourceDataInResponse)] = typeof(ResourceDataInResponse<>)
+    };
+
     private static readonly Type[] AtomicOperationDerivedSchemaTypes =
     [
         typeof(CreateResourceOperation<>),
@@ -70,24 +82,9 @@ internal sealed class ConfigureSwaggerGenOptions : IConfigureOptions<SwaggerGenO
 
     private List<Type> SelectDerivedTypes(Type baseType)
     {
-        if (baseType == typeof(ResourceIdentifierInRequest))
+        if (BaseToDerivedSchemaTypes.TryGetValue(baseType, out Type? schemaOpenType))
         {
-            return GetConstructedTypesFromResourceGraph(typeof(ResourceIdentifierInRequest<>));
-        }
-
-        if (baseType == typeof(DataInCreateResourceRequest))
-        {
-            return GetConstructedTypesFromResourceGraph(typeof(DataInCreateResourceRequest<>));
-        }
-
-        if (baseType == typeof(DataInUpdateResourceRequest))
-        {
-            return GetConstructedTypesFromResourceGraph(typeof(DataInUpdateResourceRequest<>));
-        }
-
-        if (baseType == typeof(ResourceDataInResponse))
-        {
-            return GetConstructedTypesFromResourceGraph(typeof(ResourceDataInResponse<>));
+            return GetConstructedTypesFromResourceGraph(schemaOpenType);
         }
 
         if (baseType == typeof(AtomicOperation))

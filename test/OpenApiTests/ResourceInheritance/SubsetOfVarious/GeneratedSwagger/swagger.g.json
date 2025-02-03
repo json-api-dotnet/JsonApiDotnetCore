@@ -732,34 +732,26 @@
   "components": {
     "schemas": {
       "attributesInCreateBuildingRequest": {
-        "required": [
-          "openapi:discriminator",
-          "surfaceInSquareMeters"
-        ],
-        "type": "object",
-        "properties": {
-          "surfaceInSquareMeters": {
-            "type": "integer",
-            "format": "int32"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
           },
-          "openapi:discriminator": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/resourceType"
+          {
+            "required": [
+              "surfaceInSquareMeters"
+            ],
+            "type": "object",
+            "properties": {
+              "surfaceInSquareMeters": {
+                "type": "integer",
+                "format": "int32"
               }
-            ]
+            },
+            "additionalProperties": false,
+            "x-abstract": true
           }
-        },
-        "additionalProperties": false,
-        "discriminator": {
-          "propertyName": "openapi:discriminator",
-          "mapping": {
-            "familyHomes": "#/components/schemas/attributesInCreateFamilyHomeRequest",
-            "mansions": "#/components/schemas/attributesInCreateMansionRequest",
-            "residences": "#/components/schemas/attributesInCreateResidenceRequest"
-          }
-        },
-        "x-abstract": true
+        ],
+        "additionalProperties": false
       },
       "attributesInCreateFamilyHomeRequest": {
         "allOf": [
@@ -799,6 +791,32 @@
         ],
         "additionalProperties": false
       },
+      "attributesInCreateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
+        "type": "object",
+        "properties": {
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "buildings": "#/components/schemas/attributesInCreateBuildingRequest",
+            "familyHomes": "#/components/schemas/attributesInCreateFamilyHomeRequest",
+            "mansions": "#/components/schemas/attributesInCreateMansionRequest",
+            "residences": "#/components/schemas/attributesInCreateResidenceRequest"
+          }
+        },
+        "x-abstract": true
+      },
       "attributesInCreateResidenceRequest": {
         "allOf": [
           {
@@ -821,33 +839,23 @@
         "additionalProperties": false
       },
       "attributesInUpdateBuildingRequest": {
-        "required": [
-          "openapi:discriminator"
-        ],
-        "type": "object",
-        "properties": {
-          "surfaceInSquareMeters": {
-            "type": "integer",
-            "format": "int32"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
           },
-          "openapi:discriminator": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/resourceType"
+          {
+            "type": "object",
+            "properties": {
+              "surfaceInSquareMeters": {
+                "type": "integer",
+                "format": "int32"
               }
-            ]
+            },
+            "additionalProperties": false,
+            "x-abstract": true
           }
-        },
-        "additionalProperties": false,
-        "discriminator": {
-          "propertyName": "openapi:discriminator",
-          "mapping": {
-            "familyHomes": "#/components/schemas/attributesInUpdateFamilyHomeRequest",
-            "mansions": "#/components/schemas/attributesInUpdateMansionRequest",
-            "residences": "#/components/schemas/attributesInUpdateResidenceRequest"
-          }
-        },
-        "x-abstract": true
+        ],
+        "additionalProperties": false
       },
       "attributesInUpdateFamilyHomeRequest": {
         "allOf": [
@@ -883,6 +891,32 @@
           }
         ],
         "additionalProperties": false
+      },
+      "attributesInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
+        "type": "object",
+        "properties": {
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "buildings": "#/components/schemas/attributesInUpdateBuildingRequest",
+            "familyHomes": "#/components/schemas/attributesInUpdateFamilyHomeRequest",
+            "mansions": "#/components/schemas/attributesInUpdateMansionRequest",
+            "residences": "#/components/schemas/attributesInUpdateResidenceRequest"
+          }
+        },
+        "x-abstract": true
       },
       "attributesInUpdateResidenceRequest": {
         "allOf": [
@@ -2123,29 +2157,17 @@
         "additionalProperties": false
       },
       "relationshipsInCreateBuildingRequest": {
-        "required": [
-          "openapi:discriminator"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInCreateRequest"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "x-abstract": true
+          }
         ],
-        "type": "object",
-        "properties": {
-          "openapi:discriminator": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/resourceType"
-              }
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "discriminator": {
-          "propertyName": "openapi:discriminator",
-          "mapping": {
-            "familyHomes": "#/components/schemas/relationshipsInCreateFamilyHomeRequest",
-            "mansions": "#/components/schemas/relationshipsInCreateMansionRequest",
-            "residences": "#/components/schemas/relationshipsInCreateResidenceRequest"
-          }
-        },
-        "x-abstract": true
+        "additionalProperties": false
       },
       "relationshipsInCreateFamilyHomeRequest": {
         "allOf": [
@@ -2180,6 +2202,32 @@
         ],
         "additionalProperties": false
       },
+      "relationshipsInCreateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
+        "type": "object",
+        "properties": {
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "buildings": "#/components/schemas/relationshipsInCreateBuildingRequest",
+            "familyHomes": "#/components/schemas/relationshipsInCreateFamilyHomeRequest",
+            "mansions": "#/components/schemas/relationshipsInCreateMansionRequest",
+            "residences": "#/components/schemas/relationshipsInCreateResidenceRequest"
+          }
+        },
+        "x-abstract": true
+      },
       "relationshipsInCreateResidenceRequest": {
         "allOf": [
           {
@@ -2202,29 +2250,17 @@
         "additionalProperties": false
       },
       "relationshipsInUpdateBuildingRequest": {
-        "required": [
-          "openapi:discriminator"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "x-abstract": true
+          }
         ],
-        "type": "object",
-        "properties": {
-          "openapi:discriminator": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/resourceType"
-              }
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "discriminator": {
-          "propertyName": "openapi:discriminator",
-          "mapping": {
-            "familyHomes": "#/components/schemas/relationshipsInUpdateFamilyHomeRequest",
-            "mansions": "#/components/schemas/relationshipsInUpdateMansionRequest",
-            "residences": "#/components/schemas/relationshipsInUpdateResidenceRequest"
-          }
-        },
-        "x-abstract": true
+        "additionalProperties": false
       },
       "relationshipsInUpdateFamilyHomeRequest": {
         "allOf": [
@@ -2258,6 +2294,32 @@
           }
         ],
         "additionalProperties": false
+      },
+      "relationshipsInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
+        "type": "object",
+        "properties": {
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "buildings": "#/components/schemas/relationshipsInUpdateBuildingRequest",
+            "familyHomes": "#/components/schemas/relationshipsInUpdateFamilyHomeRequest",
+            "mansions": "#/components/schemas/relationshipsInUpdateMansionRequest",
+            "residences": "#/components/schemas/relationshipsInUpdateResidenceRequest"
+          }
+        },
+        "x-abstract": true
       },
       "relationshipsInUpdateResidenceRequest": {
         "allOf": [

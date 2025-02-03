@@ -28,7 +28,7 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
 
             await UpdatePersonAsync(stoppingToken);
 
-            await SendOperationsRequestAsync(stoppingToken);
+            //await SendOperationsRequestAsync(stoppingToken);
 
             //_ = await _apiClient.GetPersonAsync("999999", null, null, stoppingToken);
         }
@@ -73,6 +73,13 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
             await _apiClient.PatchPersonAsync(updatePersonRequest.Data.Id, updatePersonRequest, cancellationToken: cancellationToken));
 
         _apiClient.Reset();
+
+        var response = await _apiClient.GetPersonAsync(updatePersonRequest.Data.Id, cancellationToken: cancellationToken);
+
+        if (response.Result.Data.Attributes!.FirstName != null)
+        {
+            Console.WriteLine("*** =- FAILED -= ***");
+        }
     }
 
     private async Task SendOperationsRequestAsync(CancellationToken cancellationToken)

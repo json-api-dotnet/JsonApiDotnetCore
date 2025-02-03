@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "ServerAndClient",
+    "Projects": [
+      {
+        "Path": "src\\Examples\\JsonApiDotNetCoreExample\\JsonApiDotNetCoreExample.csproj",
+        "Action": "Start",
+        "DebugTarget": "Kestrel"
+      },
+      {
+        "Path": "src\\Examples\\OpenApiNSwagClientExample\\OpenApiNSwagClientExample.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

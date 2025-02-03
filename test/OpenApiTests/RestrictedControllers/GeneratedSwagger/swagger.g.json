@@ -4072,40 +4072,102 @@
   },
   "components": {
     "schemas": {
-      "attributesInCreateWriteOnlyChannelRequest": {
+      "attributesInCreateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "isCommercial": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "isAdultOnly": {
-            "type": "boolean",
-            "nullable": true
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "writeOnlyChannels": "#/components/schemas/attributesInCreateWriteOnlyChannelRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributesInCreateWriteOnlyChannelRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "nullable": true
+              },
+              "isCommercial": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "isAdultOnly": {
+                "type": "boolean",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
-      "attributesInUpdateWriteOnlyChannelRequest": {
+      "attributesInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "isCommercial": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "isAdultOnly": {
-            "type": "boolean",
-            "nullable": true
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "writeOnlyChannels": "#/components/schemas/attributesInUpdateWriteOnlyChannelRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributesInUpdateWriteOnlyChannelRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "nullable": true
+              },
+              "isCommercial": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "isAdultOnly": {
+                "type": "boolean",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "createWriteOnlyChannelRequestDocument": {
@@ -5179,61 +5241,123 @@
         },
         "additionalProperties": false
       },
-      "relationshipsInCreateWriteOnlyChannelRequest": {
+      "relationshipsInCreateRequest": {
         "required": [
-          "videoStream"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "videoStream": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/toOneDataStreamInRequest"
-              }
-            ]
-          },
-          "ultraHighDefinitionVideoStream": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneDataStreamInRequest"
-              }
-            ]
-          },
-          "audioStreams": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyDataStreamInRequest"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "writeOnlyChannels": "#/components/schemas/relationshipsInCreateWriteOnlyChannelRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "relationshipsInCreateWriteOnlyChannelRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInCreateRequest"
+          },
+          {
+            "required": [
+              "videoStream"
+            ],
+            "type": "object",
+            "properties": {
+              "videoStream": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneDataStreamInRequest"
+                  }
+                ]
+              },
+              "ultraHighDefinitionVideoStream": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneDataStreamInRequest"
+                  }
+                ]
+              },
+              "audioStreams": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyDataStreamInRequest"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
-      "relationshipsInUpdateWriteOnlyChannelRequest": {
+      "relationshipsInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "videoStream": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/toOneDataStreamInRequest"
-              }
-            ]
-          },
-          "ultraHighDefinitionVideoStream": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneDataStreamInRequest"
-              }
-            ]
-          },
-          "audioStreams": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyDataStreamInRequest"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "writeOnlyChannels": "#/components/schemas/relationshipsInUpdateWriteOnlyChannelRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "relationshipsInUpdateWriteOnlyChannelRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "videoStream": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneDataStreamInRequest"
+                  }
+                ]
+              },
+              "ultraHighDefinitionVideoStream": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneDataStreamInRequest"
+                  }
+                ]
+              },
+              "audioStreams": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyDataStreamInRequest"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "resourceCollectionTopLevelLinks": {

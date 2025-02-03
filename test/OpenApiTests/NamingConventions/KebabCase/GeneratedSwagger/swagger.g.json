@@ -2763,68 +2763,148 @@
         },
         "additionalProperties": false
       },
-      "attributes-in-create-staff-member-request": {
+      "attributes-in-create-request": {
         "required": [
-          "name"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "age": {
-            "type": "integer",
-            "format": "int32"
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resource-type"
+              }
+            ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "staff-members": "#/components/schemas/attributes-in-create-staff-member-request",
+            "supermarkets": "#/components/schemas/attributes-in-create-supermarket-request"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributes-in-create-staff-member-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-create-request"
+          },
+          {
+            "required": [
+              "name"
+            ],
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "age": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "attributes-in-create-supermarket-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-create-request"
+          },
+          {
+            "required": [
+              "name-of-city"
+            ],
+            "type": "object",
+            "properties": {
+              "name-of-city": {
+                "type": "string"
+              },
+              "kind": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/supermarket-type"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "attributes-in-update-request": {
         "required": [
-          "name-of-city"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "name-of-city": {
-            "type": "string"
-          },
-          "kind": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/supermarket-type"
+                "$ref": "#/components/schemas/resource-type"
               }
             ]
           }
         },
-        "additionalProperties": false
-      },
-      "attributes-in-update-staff-member-request": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "age": {
-            "type": "integer",
-            "format": "int32"
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "staff-members": "#/components/schemas/attributes-in-update-staff-member-request",
+            "supermarkets": "#/components/schemas/attributes-in-update-supermarket-request"
           }
         },
+        "x-abstract": true
+      },
+      "attributes-in-update-staff-member-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-update-request"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "age": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "attributes-in-update-supermarket-request": {
-        "type": "object",
-        "properties": {
-          "name-of-city": {
-            "type": "string"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-update-request"
           },
-          "kind": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/supermarket-type"
+          {
+            "type": "object",
+            "properties": {
+              "name-of-city": {
+                "type": "string"
+              },
+              "kind": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/supermarket-type"
+                  }
+                ]
               }
-            ]
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "create-staff-member-operation": {
@@ -3625,61 +3705,123 @@
         },
         "additionalProperties": false
       },
-      "relationships-in-create-supermarket-request": {
+      "relationships-in-create-request": {
         "required": [
-          "store-manager"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "store-manager": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/to-one-staff-member-in-request"
-              }
-            ]
-          },
-          "backup-store-manager": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullable-to-one-staff-member-in-request"
-              }
-            ]
-          },
-          "cashiers": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-staff-member-in-request"
+                "$ref": "#/components/schemas/resource-type"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "supermarkets": "#/components/schemas/relationships-in-create-supermarket-request"
+          }
+        },
+        "x-abstract": true
+      },
+      "relationships-in-create-supermarket-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationships-in-create-request"
+          },
+          {
+            "required": [
+              "store-manager"
+            ],
+            "type": "object",
+            "properties": {
+              "store-manager": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-one-staff-member-in-request"
+                  }
+                ]
+              },
+              "backup-store-manager": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullable-to-one-staff-member-in-request"
+                  }
+                ]
+              },
+              "cashiers": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-staff-member-in-request"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
-      "relationships-in-update-supermarket-request": {
+      "relationships-in-update-request": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "store-manager": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/to-one-staff-member-in-request"
-              }
-            ]
-          },
-          "backup-store-manager": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullable-to-one-staff-member-in-request"
-              }
-            ]
-          },
-          "cashiers": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-staff-member-in-request"
+                "$ref": "#/components/schemas/resource-type"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "supermarkets": "#/components/schemas/relationships-in-update-supermarket-request"
+          }
+        },
+        "x-abstract": true
+      },
+      "relationships-in-update-supermarket-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationships-in-update-request"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "store-manager": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-one-staff-member-in-request"
+                  }
+                ]
+              },
+              "backup-store-manager": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullable-to-one-staff-member-in-request"
+                  }
+                ]
+              },
+              "cashiers": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-staff-member-in-request"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "remove-from-supermarket-cashiers-relationship-operation": {

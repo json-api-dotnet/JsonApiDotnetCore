@@ -3140,62 +3140,142 @@
   "components": {
     "schemas": {
       "attributesInCreateNameValuePairRequest": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
           },
-          "value": {
-            "type": "string",
-            "nullable": true
+          {
+            "required": [
+              "name"
+            ],
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "attributesInCreateNodeRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
+          },
+          {
+            "required": [
+              "name"
+            ],
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "comment": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "attributesInCreateRequest": {
         "required": [
-          "name"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "comment": {
-            "type": "string",
-            "nullable": true
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "nameValuePairs": "#/components/schemas/attributesInCreateNameValuePairRequest",
+            "nodes": "#/components/schemas/attributesInCreateNodeRequest"
+          }
+        },
+        "x-abstract": true
       },
       "attributesInUpdateNameValuePairRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
           },
-          "value": {
-            "type": "string",
-            "nullable": true
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "attributesInUpdateNodeRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "comment": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "attributesInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "comment": {
-            "type": "string",
-            "nullable": true
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "nameValuePairs": "#/components/schemas/attributesInUpdateNameValuePairRequest",
+            "nodes": "#/components/schemas/attributesInUpdateNodeRequest"
+          }
+        },
+        "x-abstract": true
       },
       "createNameValuePairRequestDocument": {
         "required": [
@@ -4304,87 +4384,167 @@
         "additionalProperties": false
       },
       "relationshipsInCreateNameValuePairRequest": {
-        "required": [
-          "owner"
-        ],
-        "type": "object",
-        "properties": {
-          "owner": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toOneNodeInRequest"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInCreateRequest"
+          },
+          {
+            "required": [
+              "owner"
+            ],
+            "type": "object",
+            "properties": {
+              "owner": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneNodeInRequest"
+                  }
+                ]
               }
-            ]
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "relationshipsInCreateNodeRequest": {
-        "type": "object",
-        "properties": {
-          "values": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyNameValuePairInRequest"
-              }
-            ]
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInCreateRequest"
           },
-          "parent": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneNodeInRequest"
+          {
+            "type": "object",
+            "properties": {
+              "values": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyNameValuePairInRequest"
+                  }
+                ]
+              },
+              "parent": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneNodeInRequest"
+                  }
+                ]
+              },
+              "children": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyNodeInRequest"
+                  }
+                ]
               }
-            ]
-          },
-          "children": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyNodeInRequest"
-              }
-            ]
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
-      "relationshipsInUpdateNameValuePairRequest": {
+      "relationshipsInCreateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "owner": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/toOneNodeInRequest"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "nameValuePairs": "#/components/schemas/relationshipsInCreateNameValuePairRequest",
+            "nodes": "#/components/schemas/relationshipsInCreateNodeRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "relationshipsInUpdateNameValuePairRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "owner": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneNodeInRequest"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "relationshipsInUpdateNodeRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "values": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyNameValuePairInRequest"
+                  }
+                ]
+              },
+              "parent": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneNodeInRequest"
+                  }
+                ]
+              },
+              "children": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyNodeInRequest"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "relationshipsInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "values": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/toManyNameValuePairInRequest"
-              }
-            ]
-          },
-          "parent": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneNodeInRequest"
-              }
-            ]
-          },
-          "children": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyNodeInRequest"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "nameValuePairs": "#/components/schemas/relationshipsInUpdateNameValuePairRequest",
+            "nodes": "#/components/schemas/relationshipsInUpdateNodeRequest"
+          }
+        },
+        "x-abstract": true
       },
       "resourceCollectionTopLevelLinks": {
         "type": "object",

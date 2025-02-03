@@ -232,217 +232,279 @@
   },
   "components": {
     "schemas": {
-      "attributesInCreateSocialMediaAccountRequest": {
+      "attributesInCreateRequest": {
         "required": [
-          "lastName"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "alternativeId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "firstName": {
-            "maxLength": 20,
-            "minLength": 2,
-            "type": "string",
-            "nullable": true
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "userName": {
-            "maxLength": 18,
-            "minLength": 3,
-            "pattern": "^[a-zA-Z]+$",
-            "type": "string",
-            "nullable": true
-          },
-          "creditCard": {
-            "type": "string",
-            "format": "credit-card",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "nullable": true
-          },
-          "password": {
-            "maxLength": 60,
-            "minLength": 20,
-            "type": "string",
-            "format": "byte",
-            "nullable": true
-          },
-          "phone": {
-            "type": "string",
-            "format": "tel",
-            "nullable": true
-          },
-          "age": {
-            "maximum": 122.9,
-            "exclusiveMaximum": true,
-            "minimum": 0.1,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "profilePicture": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true
-          },
-          "backgroundPicture": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true
-          },
-          "tags": {
-            "maxItems": 10,
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "countryCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "planet": {
-            "type": "string",
-            "nullable": true
-          },
-          "nextRevalidation": {
-            "type": "string",
-            "format": "date-span",
-            "nullable": true
-          },
-          "validatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "validatedAtDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "validatedAtTime": {
-            "type": "string",
-            "format": "time",
-            "nullable": true
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "socialMediaAccounts": "#/components/schemas/attributesInCreateSocialMediaAccountRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributesInCreateSocialMediaAccountRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
+          },
+          {
+            "required": [
+              "lastName"
+            ],
+            "type": "object",
+            "properties": {
+              "alternativeId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "firstName": {
+                "maxLength": 20,
+                "minLength": 2,
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "userName": {
+                "maxLength": 18,
+                "minLength": 3,
+                "pattern": "^[a-zA-Z]+$",
+                "type": "string",
+                "nullable": true
+              },
+              "creditCard": {
+                "type": "string",
+                "format": "credit-card",
+                "nullable": true
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "nullable": true
+              },
+              "password": {
+                "maxLength": 60,
+                "minLength": 20,
+                "type": "string",
+                "format": "byte",
+                "nullable": true
+              },
+              "phone": {
+                "type": "string",
+                "format": "tel",
+                "nullable": true
+              },
+              "age": {
+                "maximum": 122.9,
+                "exclusiveMaximum": true,
+                "minimum": 0.1,
+                "exclusiveMinimum": true,
+                "type": "number",
+                "format": "double",
+                "nullable": true
+              },
+              "profilePicture": {
+                "type": "string",
+                "format": "uri",
+                "nullable": true
+              },
+              "backgroundPicture": {
+                "type": "string",
+                "format": "uri",
+                "nullable": true
+              },
+              "tags": {
+                "maxItems": 10,
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "nullable": true
+              },
+              "countryCode": {
+                "type": "string",
+                "nullable": true
+              },
+              "planet": {
+                "type": "string",
+                "nullable": true
+              },
+              "nextRevalidation": {
+                "type": "string",
+                "format": "date-span",
+                "nullable": true
+              },
+              "validatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "validatedAtDate": {
+                "type": "string",
+                "format": "date",
+                "nullable": true
+              },
+              "validatedAtTime": {
+                "type": "string",
+                "format": "time",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
-      "attributesInUpdateSocialMediaAccountRequest": {
+      "attributesInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "alternativeId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "firstName": {
-            "maxLength": 20,
-            "minLength": 2,
-            "type": "string",
-            "nullable": true
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "userName": {
-            "maxLength": 18,
-            "minLength": 3,
-            "pattern": "^[a-zA-Z]+$",
-            "type": "string",
-            "nullable": true
-          },
-          "creditCard": {
-            "type": "string",
-            "format": "credit-card",
-            "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "nullable": true
-          },
-          "password": {
-            "maxLength": 60,
-            "minLength": 20,
-            "type": "string",
-            "format": "byte",
-            "nullable": true
-          },
-          "phone": {
-            "type": "string",
-            "format": "tel",
-            "nullable": true
-          },
-          "age": {
-            "maximum": 122.9,
-            "exclusiveMaximum": true,
-            "minimum": 0.1,
-            "exclusiveMinimum": true,
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "profilePicture": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true
-          },
-          "backgroundPicture": {
-            "type": "string",
-            "format": "uri",
-            "nullable": true
-          },
-          "tags": {
-            "maxItems": 10,
-            "minItems": 1,
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "countryCode": {
-            "type": "string",
-            "nullable": true
-          },
-          "planet": {
-            "type": "string",
-            "nullable": true
-          },
-          "nextRevalidation": {
-            "type": "string",
-            "format": "date-span",
-            "nullable": true
-          },
-          "validatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "validatedAtDate": {
-            "type": "string",
-            "format": "date",
-            "nullable": true
-          },
-          "validatedAtTime": {
-            "type": "string",
-            "format": "time",
-            "nullable": true
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "socialMediaAccounts": "#/components/schemas/attributesInUpdateSocialMediaAccountRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributesInUpdateSocialMediaAccountRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "alternativeId": {
+                "type": "string",
+                "format": "uuid",
+                "nullable": true
+              },
+              "firstName": {
+                "maxLength": 20,
+                "minLength": 2,
+                "type": "string",
+                "nullable": true
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "userName": {
+                "maxLength": 18,
+                "minLength": 3,
+                "pattern": "^[a-zA-Z]+$",
+                "type": "string",
+                "nullable": true
+              },
+              "creditCard": {
+                "type": "string",
+                "format": "credit-card",
+                "nullable": true
+              },
+              "email": {
+                "type": "string",
+                "format": "email",
+                "nullable": true
+              },
+              "password": {
+                "maxLength": 60,
+                "minLength": 20,
+                "type": "string",
+                "format": "byte",
+                "nullable": true
+              },
+              "phone": {
+                "type": "string",
+                "format": "tel",
+                "nullable": true
+              },
+              "age": {
+                "maximum": 122.9,
+                "exclusiveMaximum": true,
+                "minimum": 0.1,
+                "exclusiveMinimum": true,
+                "type": "number",
+                "format": "double",
+                "nullable": true
+              },
+              "profilePicture": {
+                "type": "string",
+                "format": "uri",
+                "nullable": true
+              },
+              "backgroundPicture": {
+                "type": "string",
+                "format": "uri",
+                "nullable": true
+              },
+              "tags": {
+                "maxItems": 10,
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "nullable": true
+              },
+              "countryCode": {
+                "type": "string",
+                "nullable": true
+              },
+              "planet": {
+                "type": "string",
+                "nullable": true
+              },
+              "nextRevalidation": {
+                "type": "string",
+                "format": "date-span",
+                "nullable": true
+              },
+              "validatedAt": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "validatedAtDate": {
+                "type": "string",
+                "format": "date",
+                "nullable": true
+              },
+              "validatedAtTime": {
+                "type": "string",
+                "format": "time",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "createSocialMediaAccountRequestDocument": {

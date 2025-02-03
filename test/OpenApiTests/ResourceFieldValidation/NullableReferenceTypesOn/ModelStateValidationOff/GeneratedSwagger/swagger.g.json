@@ -3420,90 +3420,152 @@
   },
   "components": {
     "schemas": {
-      "attributesInCreateResourceRequest": {
+      "attributesInCreateRequest": {
         "required": [
-          "requiredNonNullableReferenceType",
-          "requiredNullableReferenceType",
-          "requiredNullableValueType",
-          "requiredValueType"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "nonNullableReferenceType": {
-            "type": "string"
-          },
-          "requiredNonNullableReferenceType": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "nullableReferenceType": {
-            "type": "string",
-            "nullable": true
-          },
-          "requiredNullableReferenceType": {
-            "minLength": 1,
-            "type": "string",
-            "nullable": true
-          },
-          "valueType": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "requiredValueType": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "nullableValueType": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "requiredNullableValueType": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "resources": "#/components/schemas/attributesInCreateResourceRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributesInCreateResourceRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
+          },
+          {
+            "required": [
+              "requiredNonNullableReferenceType",
+              "requiredNullableReferenceType",
+              "requiredNullableValueType",
+              "requiredValueType"
+            ],
+            "type": "object",
+            "properties": {
+              "nonNullableReferenceType": {
+                "type": "string"
+              },
+              "requiredNonNullableReferenceType": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "nullableReferenceType": {
+                "type": "string",
+                "nullable": true
+              },
+              "requiredNullableReferenceType": {
+                "minLength": 1,
+                "type": "string",
+                "nullable": true
+              },
+              "valueType": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "requiredValueType": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "nullableValueType": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
+              "requiredNullableValueType": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
-      "attributesInUpdateResourceRequest": {
+      "attributesInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "nonNullableReferenceType": {
-            "type": "string"
-          },
-          "requiredNonNullableReferenceType": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "nullableReferenceType": {
-            "type": "string",
-            "nullable": true
-          },
-          "requiredNullableReferenceType": {
-            "minLength": 1,
-            "type": "string",
-            "nullable": true
-          },
-          "valueType": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "requiredValueType": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "nullableValueType": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "requiredNullableValueType": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resourceType"
+              }
+            ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "resources": "#/components/schemas/attributesInUpdateResourceRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributesInUpdateResourceRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "nonNullableReferenceType": {
+                "type": "string"
+              },
+              "requiredNonNullableReferenceType": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "nullableReferenceType": {
+                "type": "string",
+                "nullable": true
+              },
+              "requiredNullableReferenceType": {
+                "minLength": 1,
+                "type": "string",
+                "nullable": true
+              },
+              "valueType": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "requiredValueType": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "nullableValueType": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
+              "requiredNullableValueType": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "createResourceRequestDocument": {
@@ -4199,105 +4261,167 @@
         },
         "additionalProperties": false
       },
-      "relationshipsInCreateResourceRequest": {
+      "relationshipsInCreateRequest": {
         "required": [
-          "requiredNonNullableToOne",
-          "requiredNullableToOne",
-          "requiredToMany"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "nonNullableToOne": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/toOneEmptyInRequest"
-              }
-            ]
-          },
-          "requiredNonNullableToOne": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toOneEmptyInRequest"
-              }
-            ]
-          },
-          "nullableToOne": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneEmptyInRequest"
-              }
-            ]
-          },
-          "requiredNullableToOne": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneEmptyInRequest"
-              }
-            ]
-          },
-          "toMany": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyEmptyInRequest"
-              }
-            ]
-          },
-          "requiredToMany": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyEmptyInRequest"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "resources": "#/components/schemas/relationshipsInCreateResourceRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "relationshipsInCreateResourceRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInCreateRequest"
+          },
+          {
+            "required": [
+              "requiredNonNullableToOne",
+              "requiredNullableToOne",
+              "requiredToMany"
+            ],
+            "type": "object",
+            "properties": {
+              "nonNullableToOne": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneEmptyInRequest"
+                  }
+                ]
+              },
+              "requiredNonNullableToOne": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneEmptyInRequest"
+                  }
+                ]
+              },
+              "nullableToOne": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneEmptyInRequest"
+                  }
+                ]
+              },
+              "requiredNullableToOne": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneEmptyInRequest"
+                  }
+                ]
+              },
+              "toMany": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyEmptyInRequest"
+                  }
+                ]
+              },
+              "requiredToMany": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyEmptyInRequest"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
-      "relationshipsInUpdateResourceRequest": {
+      "relationshipsInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "nonNullableToOne": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/toOneEmptyInRequest"
-              }
-            ]
-          },
-          "requiredNonNullableToOne": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toOneEmptyInRequest"
-              }
-            ]
-          },
-          "nullableToOne": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneEmptyInRequest"
-              }
-            ]
-          },
-          "requiredNullableToOne": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneEmptyInRequest"
-              }
-            ]
-          },
-          "toMany": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyEmptyInRequest"
-              }
-            ]
-          },
-          "requiredToMany": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyEmptyInRequest"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "resources": "#/components/schemas/relationshipsInUpdateResourceRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "relationshipsInUpdateResourceRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "nonNullableToOne": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneEmptyInRequest"
+                  }
+                ]
+              },
+              "requiredNonNullableToOne": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneEmptyInRequest"
+                  }
+                ]
+              },
+              "nullableToOne": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneEmptyInRequest"
+                  }
+                ]
+              },
+              "requiredNullableToOne": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneEmptyInRequest"
+                  }
+                ]
+              },
+              "toMany": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyEmptyInRequest"
+                  }
+                ]
+              },
+              "requiredToMany": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyEmptyInRequest"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "resourceAttributesInResponse": {

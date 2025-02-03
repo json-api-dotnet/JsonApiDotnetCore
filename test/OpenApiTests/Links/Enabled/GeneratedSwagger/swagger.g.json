@@ -3960,124 +3960,240 @@
         "additionalProperties": false
       },
       "attributesInCreateAccommodationRequest": {
-        "required": [
-          "address"
-        ],
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
+          },
+          {
+            "required": [
+              "address"
+            ],
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "attributesInCreateExcursionRequest": {
-        "required": [
-          "description",
-          "occursAt"
-        ],
-        "type": "object",
-        "properties": {
-          "occursAt": {
-            "type": "string",
-            "format": "date-time"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
           },
-          "description": {
-            "type": "string"
+          {
+            "required": [
+              "description",
+              "occursAt"
+            ],
+            "type": "object",
+            "properties": {
+              "occursAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
-      "attributesInCreateTransportRequest": {
+      "attributesInCreateRequest": {
         "required": [
-          "durationInMinutes",
-          "type"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "type": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/transportType"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
-          },
-          "durationInMinutes": {
-            "type": "integer",
-            "format": "int32"
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "accommodations": "#/components/schemas/attributesInCreateAccommodationRequest",
+            "excursions": "#/components/schemas/attributesInCreateExcursionRequest",
+            "transports": "#/components/schemas/attributesInCreateTransportRequest",
+            "vacations": "#/components/schemas/attributesInCreateVacationRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributesInCreateTransportRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
+          },
+          {
+            "required": [
+              "durationInMinutes",
+              "type"
+            ],
+            "type": "object",
+            "properties": {
+              "type": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/transportType"
+                  }
+                ]
+              },
+              "durationInMinutes": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "attributesInCreateVacationRequest": {
-        "required": [
-          "endsAt",
-          "startsAt"
-        ],
-        "type": "object",
-        "properties": {
-          "startsAt": {
-            "type": "string",
-            "format": "date-time"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInCreateRequest"
           },
-          "endsAt": {
-            "type": "string",
-            "format": "date-time"
+          {
+            "required": [
+              "endsAt",
+              "startsAt"
+            ],
+            "type": "object",
+            "properties": {
+              "startsAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "endsAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "attributesInUpdateAccommodationRequest": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "attributesInUpdateExcursionRequest": {
-        "type": "object",
-        "properties": {
-          "occursAt": {
-            "type": "string",
-            "format": "date-time"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
           },
-          "description": {
-            "type": "string"
+          {
+            "type": "object",
+            "properties": {
+              "occursAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
-      "attributesInUpdateTransportRequest": {
+      "attributesInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "type": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/transportType"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
-          },
-          "durationInMinutes": {
-            "type": "integer",
-            "format": "int32"
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "accommodations": "#/components/schemas/attributesInUpdateAccommodationRequest",
+            "excursions": "#/components/schemas/attributesInUpdateExcursionRequest",
+            "transports": "#/components/schemas/attributesInUpdateTransportRequest",
+            "vacations": "#/components/schemas/attributesInUpdateVacationRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributesInUpdateTransportRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/transportType"
+                  }
+                ]
+              },
+              "durationInMinutes": {
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "attributesInUpdateVacationRequest": {
-        "type": "object",
-        "properties": {
-          "startsAt": {
-            "type": "string",
-            "format": "date-time"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributesInUpdateRequest"
           },
-          "endsAt": {
-            "type": "string",
-            "format": "date-time"
+          {
+            "type": "object",
+            "properties": {
+              "startsAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "endsAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "createAccommodationRequestDocument": {
@@ -4997,61 +5113,123 @@
         },
         "additionalProperties": false
       },
-      "relationshipsInCreateVacationRequest": {
+      "relationshipsInCreateRequest": {
         "required": [
-          "accommodation"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "accommodation": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/toOneAccommodationInRequest"
-              }
-            ]
-          },
-          "transport": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneTransportInRequest"
-              }
-            ]
-          },
-          "excursions": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyExcursionInRequest"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "vacations": "#/components/schemas/relationshipsInCreateVacationRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "relationshipsInCreateVacationRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInCreateRequest"
+          },
+          {
+            "required": [
+              "accommodation"
+            ],
+            "type": "object",
+            "properties": {
+              "accommodation": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneAccommodationInRequest"
+                  }
+                ]
+              },
+              "transport": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneTransportInRequest"
+                  }
+                ]
+              },
+              "excursions": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyExcursionInRequest"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
-      "relationshipsInUpdateVacationRequest": {
+      "relationshipsInUpdateRequest": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "accommodation": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/toOneAccommodationInRequest"
-              }
-            ]
-          },
-          "transport": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullableToOneTransportInRequest"
-              }
-            ]
-          },
-          "excursions": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/toManyExcursionInRequest"
+                "$ref": "#/components/schemas/resourceType"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "vacations": "#/components/schemas/relationshipsInUpdateVacationRequest"
+          }
+        },
+        "x-abstract": true
+      },
+      "relationshipsInUpdateVacationRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationshipsInUpdateRequest"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "accommodation": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toOneAccommodationInRequest"
+                  }
+                ]
+              },
+              "transport": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullableToOneTransportInRequest"
+                  }
+                ]
+              },
+              "excursions": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/toManyExcursionInRequest"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "resourceCollectionTopLevelLinks": {

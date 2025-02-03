@@ -6062,152 +6062,259 @@
         "additionalProperties": false
       },
       "attributes-in-create-airplane-request": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "maxLength": 255,
-            "type": "string"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-create-request"
           },
-          "serial-number": {
-            "maxLength": 16,
-            "type": "string",
-            "nullable": true
-          },
-          "airtime-in-hours": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "last-serviced-at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+          {
+            "required": [
+              "name"
+            ],
+            "type": "object",
+            "properties": {
+              "name": {
+                "maxLength": 255,
+                "type": "string"
+              },
+              "serial-number": {
+                "maxLength": 16,
+                "type": "string",
+                "nullable": true
+              },
+              "airtime-in-hours": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
+              "last-serviced-at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "attributes-in-create-flight-attendant-request": {
-        "required": [
-          "email-address",
-          "profile-image-url"
-        ],
-        "type": "object",
-        "properties": {
-          "email-address": {
-            "minLength": 1,
-            "type": "string",
-            "format": "email"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-create-request"
           },
-          "age": {
-            "maximum": 75,
-            "minimum": 18,
-            "type": "integer",
-            "format": "int32"
-          },
-          "profile-image-url": {
-            "type": "string",
-            "format": "uri"
+          {
+            "required": [
+              "email-address",
+              "profile-image-url"
+            ],
+            "type": "object",
+            "properties": {
+              "email-address": {
+                "minLength": 1,
+                "type": "string",
+                "format": "email"
+              },
+              "age": {
+                "maximum": 75,
+                "minimum": 18,
+                "type": "integer",
+                "format": "int32"
+              },
+              "profile-image-url": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "attributes-in-create-passenger-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-create-request"
+          },
+          {
+            "required": [
+              "document-number"
+            ],
+            "type": "object",
+            "properties": {
+              "document-number": {
+                "maxLength": 9,
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "attributes-in-create-request": {
         "required": [
-          "document-number"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "document-number": {
-            "maxLength": 9,
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "attributes-in-update-airplane-request": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "maxLength": 255,
-            "type": "string"
-          },
-          "serial-number": {
-            "maxLength": 16,
-            "type": "string",
-            "nullable": true
-          },
-          "airtime-in-hours": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "last-serviced-at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "is-in-maintenance": {
-            "type": "boolean"
-          },
-          "manufactured-in-city": {
-            "maxLength": 85,
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "attributes-in-update-flight-attendant-request": {
-        "type": "object",
-        "properties": {
-          "email-address": {
-            "minLength": 1,
-            "type": "string",
-            "format": "email"
-          },
-          "age": {
-            "maximum": 75,
-            "minimum": 18,
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "attributes-in-update-flight-request": {
-        "type": "object",
-        "properties": {
-          "final-destination": {
-            "maxLength": 40,
-            "type": "string"
-          },
-          "stop-over-destination": {
-            "maxLength": 2000,
-            "type": "string",
-            "nullable": true
-          },
-          "operated-by": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/airline"
+                "$ref": "#/components/schemas/resource-type"
               }
             ]
           }
         },
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "airplanes": "#/components/schemas/attributes-in-create-airplane-request",
+            "flight-attendants": "#/components/schemas/attributes-in-create-flight-attendant-request",
+            "passengers": "#/components/schemas/attributes-in-create-passenger-request"
+          }
+        },
+        "x-abstract": true
+      },
+      "attributes-in-update-airplane-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-update-request"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "name": {
+                "maxLength": 255,
+                "type": "string"
+              },
+              "serial-number": {
+                "maxLength": 16,
+                "type": "string",
+                "nullable": true
+              },
+              "airtime-in-hours": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
+              "last-serviced-at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "is-in-maintenance": {
+                "type": "boolean"
+              },
+              "manufactured-in-city": {
+                "maxLength": 85,
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "attributes-in-update-flight-attendant-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-update-request"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "email-address": {
+                "minLength": 1,
+                "type": "string",
+                "format": "email"
+              },
+              "age": {
+                "maximum": 75,
+                "minimum": 18,
+                "type": "integer",
+                "format": "int32"
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "attributes-in-update-flight-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-update-request"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "final-destination": {
+                "maxLength": 40,
+                "type": "string"
+              },
+              "stop-over-destination": {
+                "maxLength": 2000,
+                "type": "string",
+                "nullable": true
+              },
+              "operated-by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/airline"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
         "additionalProperties": false
       },
       "attributes-in-update-passenger-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/attributes-in-update-request"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "document-number": {
+                "maxLength": 9,
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "attributes-in-update-request": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "document-number": {
-            "maxLength": 9,
-            "type": "string"
+          "openapi:discriminator": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/resource-type"
+              }
+            ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "airplanes": "#/components/schemas/attributes-in-update-airplane-request",
+            "flight-attendants": "#/components/schemas/attributes-in-update-flight-attendant-request",
+            "flights": "#/components/schemas/attributes-in-update-flight-request",
+            "passengers": "#/components/schemas/attributes-in-update-passenger-request"
+          }
+        },
+        "x-abstract": true
       },
       "cabin-area": {
         "enum": [
@@ -7853,141 +7960,239 @@
         "additionalProperties": false
       },
       "relationships-in-create-airplane-request": {
-        "type": "object",
-        "properties": {
-          "flights": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-flight-in-request"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationships-in-create-request"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "flights": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-flight-in-request"
+                  }
+                ]
               }
-            ]
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "relationships-in-create-flight-attendant-request": {
-        "type": "object",
-        "properties": {
-          "scheduled-for-flights": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-flight-in-request"
-              }
-            ]
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationships-in-create-request"
           },
-          "purser-on-flights": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-flight-in-request"
+          {
+            "type": "object",
+            "properties": {
+              "scheduled-for-flights": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-flight-in-request"
+                  }
+                ]
+              },
+              "purser-on-flights": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-flight-in-request"
+                  }
+                ]
               }
-            ]
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "relationships-in-create-flight-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationships-in-create-request"
+          },
+          {
+            "required": [
+              "purser"
+            ],
+            "type": "object",
+            "properties": {
+              "cabin-crew-members": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-flight-attendant-in-request"
+                  }
+                ]
+              },
+              "purser": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-one-flight-attendant-in-request"
+                  }
+                ]
+              },
+              "backup-purser": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullable-to-one-flight-attendant-in-request"
+                  }
+                ]
+              },
+              "passengers": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-passenger-in-request"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "relationships-in-create-request": {
         "required": [
-          "purser"
+          "openapi:discriminator"
         ],
         "type": "object",
         "properties": {
-          "cabin-crew-members": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/to-many-flight-attendant-in-request"
-              }
-            ]
-          },
-          "purser": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-one-flight-attendant-in-request"
-              }
-            ]
-          },
-          "backup-purser": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullable-to-one-flight-attendant-in-request"
-              }
-            ]
-          },
-          "passengers": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-passenger-in-request"
+                "$ref": "#/components/schemas/resource-type"
               }
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "airplanes": "#/components/schemas/relationships-in-create-airplane-request",
+            "flight-attendants": "#/components/schemas/relationships-in-create-flight-attendant-request",
+            "flights": "#/components/schemas/relationships-in-create-flight-request"
+          }
+        },
+        "x-abstract": true
       },
       "relationships-in-update-airplane-request": {
-        "type": "object",
-        "properties": {
-          "flights": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-flight-in-request"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationships-in-update-request"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "flights": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-flight-in-request"
+                  }
+                ]
               }
-            ]
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "relationships-in-update-flight-attendant-request": {
-        "type": "object",
-        "properties": {
-          "scheduled-for-flights": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-flight-in-request"
-              }
-            ]
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationships-in-update-request"
           },
-          "purser-on-flights": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-flight-in-request"
+          {
+            "type": "object",
+            "properties": {
+              "scheduled-for-flights": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-flight-in-request"
+                  }
+                ]
+              },
+              "purser-on-flights": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-flight-in-request"
+                  }
+                ]
               }
-            ]
+            },
+            "additionalProperties": false
           }
-        },
+        ],
         "additionalProperties": false
       },
       "relationships-in-update-flight-request": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/relationships-in-update-request"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cabin-crew-members": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-flight-attendant-in-request"
+                  }
+                ]
+              },
+              "purser": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-one-flight-attendant-in-request"
+                  }
+                ]
+              },
+              "backup-purser": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/nullable-to-one-flight-attendant-in-request"
+                  }
+                ]
+              },
+              "passengers": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/to-many-passenger-in-request"
+                  }
+                ]
+              }
+            },
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      },
+      "relationships-in-update-request": {
+        "required": [
+          "openapi:discriminator"
+        ],
         "type": "object",
         "properties": {
-          "cabin-crew-members": {
+          "openapi:discriminator": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/to-many-flight-attendant-in-request"
-              }
-            ]
-          },
-          "purser": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-one-flight-attendant-in-request"
-              }
-            ]
-          },
-          "backup-purser": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/nullable-to-one-flight-attendant-in-request"
-              }
-            ]
-          },
-          "passengers": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/to-many-passenger-in-request"
+                "$ref": "#/components/schemas/resource-type"
               }
             ]
           }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "discriminator": {
+          "propertyName": "openapi:discriminator",
+          "mapping": {
+            "airplanes": "#/components/schemas/relationships-in-update-airplane-request",
+            "flight-attendants": "#/components/schemas/relationships-in-update-flight-attendant-request",
+            "flights": "#/components/schemas/relationships-in-update-flight-request"
+          }
+        },
+        "x-abstract": true
       },
       "resource-collection-top-level-links": {
         "type": "object",

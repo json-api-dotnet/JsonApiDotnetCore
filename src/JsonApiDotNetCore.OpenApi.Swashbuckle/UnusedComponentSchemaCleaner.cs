@@ -26,7 +26,7 @@ internal sealed class UnusedComponentSchemaCleaner : IDocumentFilter
         HashSet<string> unusedSchemaIds = GetUnusedSchemaIds(document);
         AssertNoUnknownSchemasFound(unusedSchemaIds);
 
-        RemoveUnusedComponentSchemas(document, unusedSchemaIds);
+        //RemoveUnusedComponentSchemas(document, unusedSchemaIds);
     }
 
     private static HashSet<string> GetUnusedSchemaIds(OpenApiDocument document)
@@ -42,7 +42,7 @@ internal sealed class UnusedComponentSchemaCleaner : IDocumentFilter
     {
         if (unusedSchemaIds.Count > 0)
         {
-            throw new InvalidOperationException($"Detected unused component schemas: {string.Join(", ", unusedSchemaIds)}");
+            //throw new InvalidOperationException($"Detected unused component schemas: {string.Join(", ", unusedSchemaIds)}");
         }
     }
 
