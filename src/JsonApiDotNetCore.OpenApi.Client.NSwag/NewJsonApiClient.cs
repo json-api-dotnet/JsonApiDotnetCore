@@ -8,6 +8,7 @@ namespace JsonApiDotNetCore.OpenApi.Client.NSwag;
 public abstract class NewJsonApiClient
 {
     private readonly Dictionary<INotifyPropertyChanged, ISet<string>> _propertyStore = [];
+    private JsonSerializerSettings _serializerSettings = null!;
 
     internal void Track<T>(T container)
         where T : INotifyPropertyChanged, new()
@@ -43,13 +44,14 @@ public abstract class NewJsonApiClient
     {
         ArgumentNullException.ThrowIfNull(serializerSettings);
 
+        _serializerSettings = serializerSettings;
         //serializerSettings.Converters.Insert(0, new PropertyTrackingWriteConverter(this));
         //serializerSettings.Converters.Insert(0, new PropertyTrackingReadConverter(this));
 
         //serializerSettings.Converters.Add(new PropertyTrackingReadConverter(this));
         serializerSettings.Converters.Add(new PropertyTrackingWriteConverter(this));
 
-        //serializerSettings.ContractResolver = new JsonApiFieldContractResolver(this);
+        serializerSettings.ContractResolver = new JsonApiFieldContractResolver(this);
         //serializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     }
 
@@ -92,10 +94,10 @@ public abstract class NewJsonApiClient
                 Console.WriteLine($"ResolveContractConverter for {objectType.Name}");
             }
 
-            /*if (_apiClient._propertyStore.Keys.Any(containingType => containingType.GetType() == objectType))
+            if (_apiClient._propertyStore.Keys.Any(containingType => containingType.GetType() == objectType))
             {
                 return new PropertyTrackingWriteConverter(_apiClient);
-            }*/
+            }
 
             return base.ResolveContractConverter(objectType);
         }
@@ -149,7 +151,7 @@ public abstract class NewJsonApiClient
 
             if (IsWriting.Value)
             {
-                IsWriting.Value = false;
+                //IsWriting.Value = false;
                 result = false;
             }
             else
@@ -187,18 +189,14 @@ public abstract class NewJsonApiClient
             {
                 IsWriting.Value = true;
                 //bool isObjectTracked = value is INotifyPropertyChanged container && _apiClient._propertyStore.TryGetValue(container, out ISet<string>? properties);
-                bool isObjectTracked = value is INotifyPropertyChanged container && _apiClient._propertyStore.ContainsKey(container);
+                //bool isObjectTracked = value is INotifyPropertyChanged container && _apiClient._propertyStore.ContainsKey(container);
 
-                Console.WriteLine($"PropertyTrackingWriteConverter.WriteJson for {(value != null ? value.GetType().Name : "null")}, isPropertyTracked={isObjectTracked})");
+                
 
-                if (isObjectTracked)
+                if (value is INotifyPropertyChanged container && _apiClient._propertyStore.TryGetValue(container, out ISet<string>? properties))
                 {
-                    var backupContractResolver = serializer.ContractResolver;
-                    serializer.ContractResolver = new AlwaysIncludeContractResolver();
-                    serializer.Serialize(writer, value);
-                    serializer.ContractResolver = backupContractResolver;
+                    Console.WriteLine($"PropertyTrackingWriteConverter.WriteJson for {value.GetType().Name}");
 
-                    /*
                     writer.WriteStartObject();
 
                     foreach (string propertyName in properties)
@@ -213,11 +211,18 @@ public abstract class NewJsonApiClient
                     }
 
                     writer.WriteEndObject();
-                    */
+                    
                 }
                 else
                 {
-                    serializer.Serialize(writer, value);
+                    
+                    var tempSettings = new JsonSerializerSettings(_apiClient._serializerSettings);
+                    tempSettings.ContractResolver = null;
+                    var tempSerializer = JsonSerializer.Create(tempSettings);
+
+
+                    //serializer.Serialize(writer, value);
+                    tempSerializer.Serialize(writer, value);
                 }
             }
             finally

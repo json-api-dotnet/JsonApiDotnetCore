@@ -26,9 +26,9 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
             //ApiResponse<PersonCollectionResponseDocument?> getResponseAgain = await GetPeopleAsync(_apiClient, queryString, eTag, stoppingToken);
             //PeopleMessageFormatter.PrintPeople(getResponseAgain);
 
-            await UpdatePersonAsync(stoppingToken);
+            //await UpdatePersonAsync(stoppingToken);
 
-            //await SendOperationsRequestAsync(stoppingToken);
+            await SendOperationsRequestAsync(stoppingToken);
 
             //_ = await _apiClient.GetPersonAsync("999999", null, null, stoppingToken);
         }
