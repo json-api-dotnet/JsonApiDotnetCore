@@ -12,7 +12,6 @@ namespace OpenApiNSwagClientTests.LegacyOpenApi;
 
 public sealed class RequestTests
 {
-    /*
     private const string OpenApiMediaType = "application/vnd.api+json; ext=openapi";
     private const string HostPrefix = "http://localhost/api/";
 
@@ -102,6 +101,7 @@ public sealed class RequestTests
               "data": {
                 "type": "flights",
                 "relationships": {
+                  "openapi:discriminator": "flights",
                   "purser": {
                     "data": {
                       "type": "flight-attendants",
@@ -144,20 +144,20 @@ public sealed class RequestTests
         {
             Data = new DataInCreateAirplaneRequest
             {
-                Attributes = new AttributesInCreateAirplaneRequest
+                Attributes = new TrackChangesFor<AttributesInCreateAirplaneRequest>(apiClient)
                 {
-                    Name = name,
-                    AirtimeInHours = 800
-                }
+                    Initializer =
+                    {
+                        Name = name,
+                        AirtimeInHours = 800,
+                        SerialNumber = null
+                    }
+                }.Initializer
             }
         };
 
-        using (apiClient.WithPartialAttributeSerialization<CreateAirplaneRequestDocument, AttributesInCreateAirplaneRequest>(requestDocument,
-            airplane => airplane.SerialNumber))
-        {
-            // Act
-            _ = await ApiResponse.TranslateAsync(async () => await apiClient.PostAirplaneAsync(null, requestDocument));
-        }
+        // Act
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PostAirplaneAsync(null, requestDocument));
 
         // Assert
         wrapper.Request.ShouldNotBeNull();
@@ -173,6 +173,7 @@ public sealed class RequestTests
               "data": {
                 "type": "airplanes",
                 "attributes": {
+                  "openapi:discriminator": "airplanes",
                   "name": "{{name}}",
                   "serial-number": null,
                   "airtime-in-hours": 800
@@ -197,19 +198,21 @@ public sealed class RequestTests
             Data = new DataInUpdateAirplaneRequest
             {
                 Id = airplaneId,
-                Attributes = new AttributesInUpdateAirplaneRequest
+                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
                 {
-                    LastServicedAt = lastServicedAt
-                }
+                    Initializer =
+                    {
+                        LastServicedAt = lastServicedAt,
+                        SerialNumber = null,
+                        IsInMaintenance = false,
+                        AirtimeInHours = null
+                    }
+                }.Initializer
             }
         };
 
-        using (apiClient.WithPartialAttributeSerialization<UpdateAirplaneRequestDocument, AttributesInUpdateAirplaneRequest>(requestDocument,
-            airplane => airplane.SerialNumber, airplane => airplane.LastServicedAt, airplane => airplane.IsInMaintenance, airplane => airplane.AirtimeInHours))
-        {
-            // Act
-            _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId, null, requestDocument));
-        }
+        // Act
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId, null, requestDocument));
 
         // Assert
         wrapper.Request.ShouldNotBeNull();
@@ -226,6 +229,7 @@ public sealed class RequestTests
                 "type": "airplanes",
                 "id": "XUuiP",
                 "attributes": {
+                  "openapi:discriminator": "airplanes",
                   "serial-number": null,
                   "airtime-in-hours": null,
                   "last-serviced-at": "2021-01-01T15:23:05.033+04:00",
@@ -525,5 +529,4 @@ public sealed class RequestTests
             }
             """);
     }
-    */
 }

@@ -10,7 +10,7 @@ namespace OpenApiNSwagClientTests.LegacyOpenApi;
 public sealed class PartialAttributeSerializationLifetimeTests
 {
     [Fact]
-    public async Task Clears_tracked_properties_after_first_use()
+    public async Task Automatically_clears_tracked_properties_after_usage()
     {
         // Arrange
         using var wrapper = FakeHttpClientWrapper.Create(HttpStatusCode.NoContent, null);
@@ -27,7 +27,8 @@ public sealed class PartialAttributeSerializationLifetimeTests
                 {
                     Initializer =
                     {
-                        AirtimeInHours = null
+                        AirtimeInHours = null,
+                        LastServicedAt = null
                     }
                 }.Initializer
             }
@@ -56,10 +57,11 @@ public sealed class PartialAttributeSerializationLifetimeTests
     }
 
     [Fact]
-    public async Task Keeps_tracked_properties_after_first_use()
+    public async Task Can_preserve_tracked_properties_after_usage()
     {
         // Arrange
         using var wrapper = FakeHttpClientWrapper.Create(HttpStatusCode.NoContent, null);
+
         var apiClient = new LegacyClient(wrapper.HttpClient)
         {
             AutoClearTracked = false
@@ -107,28 +109,16 @@ public sealed class PartialAttributeSerializationLifetimeTests
     }
 
     [Fact]
-    public async Task Different_instances_of_same_type_are_isolated()
+    public async Task Can_manually_clear_tracked_properties_after_usage()
     {
         // Arrange
         using var wrapper = FakeHttpClientWrapper.Create(HttpStatusCode.NoContent, null);
-        var apiClient = new LegacyClient(wrapper.HttpClient);
-
-        _ = new UpdateAirplaneRequestDocument
+        var apiClient = new LegacyClient(wrapper.HttpClient)
         {
-            Data = new DataInUpdateAirplaneRequest
-            {
-                Id = "XUuiP",
-                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
-                {
-                    Initializer =
-                    {
-                        AirtimeInHours = null
-                    }
-                }.Initializer
-            }
+            AutoClearTracked = false
         };
 
-        const string airplaneId = "DJy1u";
+        const string airplaneId = "XUuiP";
 
         var requestDocument = new UpdateAirplaneRequestDocument
         {
@@ -139,13 +129,18 @@ public sealed class PartialAttributeSerializationLifetimeTests
                 {
                     Initializer =
                     {
+                        AirtimeInHours = null,
                         LastServicedAt = null
                     }
                 }.Initializer
             }
         };
 
-        apiClient.RemoveContainer(requestDocument.Data.Attributes);
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId, null, requestDocument));
+
+        apiClient.ClearAllTracked();
+
+        wrapper.ChangeResponse(HttpStatusCode.NoContent, null);
 
         // Act
         _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId, null, requestDocument));
@@ -159,6 +154,69 @@ public sealed class PartialAttributeSerializationLifetimeTests
                 "attributes": {
                   "openapi:discriminator": "airplanes",
                   "is-in-maintenance": false
+                }
+              }
+            }
+            """);
+    }
+
+    [Fact]
+    public async Task Different_instances_of_same_type_are_isolated()
+    {
+        // Arrange
+        using var wrapper = FakeHttpClientWrapper.Create(HttpStatusCode.NoContent, null);
+        var apiClient = new LegacyClient(wrapper.HttpClient);
+
+        const string airplaneId1 = "XUuiP";
+
+        var requestDocument1 = new UpdateAirplaneRequestDocument
+        {
+            Data = new DataInUpdateAirplaneRequest
+            {
+                Id = airplaneId1,
+                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
+                {
+                    Initializer =
+                    {
+                        AirtimeInHours = null
+                    }
+                }.Initializer
+            }
+        };
+
+        const string airplaneId2 = "DJy1u";
+
+        var requestDocument2 = new UpdateAirplaneRequestDocument
+        {
+            Data = new DataInUpdateAirplaneRequest
+            {
+                Id = airplaneId2,
+                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
+                {
+                    Initializer =
+                    {
+                        LastServicedAt = null
+                    }
+                }.Initializer
+            }
+        };
+
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId2, null, requestDocument2));
+
+        wrapper.ChangeResponse(HttpStatusCode.NoContent, null);
+
+        // Act
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId1, null, requestDocument1));
+
+        // Assert
+        wrapper.RequestBody.Should().BeJson($$"""
+            {
+              "data": {
+                "type": "airplanes",
+                "id": "{{airplaneId1}}",
+                "attributes": {
+                  "openapi:discriminator": "airplanes",
+                  "airtime-in-hours": null
                 }
               }
             }
@@ -209,8 +267,6 @@ public sealed class PartialAttributeSerializationLifetimeTests
             """);
     }
 
-    // TODO: Repair tests from here...
-    /*
     [Fact]
     public async Task Registration_is_unaffected_by_successive_registration_for_document_of_different_type()
     {
@@ -218,43 +274,48 @@ public sealed class PartialAttributeSerializationLifetimeTests
         using var wrapper = FakeHttpClientWrapper.Create(HttpStatusCode.NoContent, null);
         var apiClient = new LegacyClient(wrapper.HttpClient);
 
-        const string airplaneId1 = "XUuiP";
+        const string airplaneId = "XUuiP";
 
-        var requestDocument1 = new UpdateAirplaneRequestDocument
+        var requestDocument = new UpdateAirplaneRequestDocument
         {
             Data = new DataInUpdateAirplaneRequest
             {
-                Id = airplaneId1,
-                Attributes = new AttributesInUpdateAirplaneRequest()
+                Id = airplaneId,
+                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
+                {
+                    Initializer =
+                    {
+                        IsInMaintenance = false
+                    }
+                }.Initializer
             }
         };
 
-        var requestDocument2 = new CreateAirplaneRequestDocument
+        _ = new CreateAirplaneRequestDocument
         {
             Data = new DataInCreateAirplaneRequest
             {
-                Attributes = new AttributesInCreateAirplaneRequest()
+                Attributes = new TrackChangesFor<AttributesInCreateAirplaneRequest>(apiClient)
+                {
+                    Initializer =
+                    {
+                        AirtimeInHours = null
+                    }
+                }.Initializer
             }
         };
 
-        using (apiClient.WithPartialAttributeSerialization<UpdateAirplaneRequestDocument, AttributesInUpdateAirplaneRequest>(requestDocument1,
-            airplane => airplane.IsInMaintenance))
-        {
-            using (apiClient.WithPartialAttributeSerialization<CreateAirplaneRequestDocument, AttributesInCreateAirplaneRequest>(requestDocument2,
-                airplane => airplane.AirtimeInHours))
-            {
-                // Act
-                _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId1, null, requestDocument1));
-            }
-        }
+        // Act
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId, null, requestDocument));
 
         // Assert
         wrapper.RequestBody.Should().BeJson($$"""
             {
               "data": {
                 "type": "airplanes",
-                "id": "{{airplaneId1}}",
+                "id": "{{airplaneId}}",
                 "attributes": {
+                  "openapi:discriminator": "airplanes",
                   "is-in-maintenance": false
                 }
               }
@@ -276,15 +337,17 @@ public sealed class PartialAttributeSerializationLifetimeTests
             Data = new DataInUpdateAirplaneRequest
             {
                 Id = airplaneId1,
-                Attributes = new AttributesInUpdateAirplaneRequest()
+                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
+                {
+                    Initializer =
+                    {
+                        AirtimeInHours = null
+                    }
+                }.Initializer
             }
         };
 
-        using (apiClient.WithPartialAttributeSerialization<UpdateAirplaneRequestDocument, AttributesInUpdateAirplaneRequest>(requestDocument1,
-            airplane => airplane.AirtimeInHours))
-        {
-            _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId1, null, requestDocument1));
-        }
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId1, null, requestDocument1));
 
         const string airplaneId2 = "DJy1u";
 
@@ -293,21 +356,21 @@ public sealed class PartialAttributeSerializationLifetimeTests
             Data = new DataInUpdateAirplaneRequest
             {
                 Id = airplaneId2,
-                Attributes = new AttributesInUpdateAirplaneRequest
+                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
                 {
-                    ManufacturedInCity = "Everett"
-                }
+                    Initializer =
+                    {
+                        SerialNumber = null,
+                        ManufacturedInCity = "Everett"
+                    }
+                }.Initializer
             }
         };
 
         wrapper.ChangeResponse(HttpStatusCode.NoContent, null);
 
-        using (apiClient.WithPartialAttributeSerialization<UpdateAirplaneRequestDocument, AttributesInUpdateAirplaneRequest>(requestDocument2,
-            airplane => airplane.SerialNumber))
-        {
-            // Act
-            _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId2, null, requestDocument2));
-        }
+        // Act
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId2, null, requestDocument2));
 
         // Assert
         wrapper.RequestBody.Should().BeJson($$"""
@@ -316,6 +379,7 @@ public sealed class PartialAttributeSerializationLifetimeTests
                 "type": "airplanes",
                 "id": "{{airplaneId2}}",
                 "attributes": {
+                  "openapi:discriminator": "airplanes",
                   "serial-number": null,
                   "manufactured-in-city": "Everett"
                 }
@@ -335,18 +399,18 @@ public sealed class PartialAttributeSerializationLifetimeTests
         {
             Data = new DataInCreateAirplaneRequest
             {
-                Attributes = new AttributesInCreateAirplaneRequest
+                Attributes = new TrackChangesFor<AttributesInCreateAirplaneRequest>(apiClient)
                 {
-                    Name = "Jay Jay the Jet Plane"
-                }
+                    Initializer =
+                    {
+                        AirtimeInHours = null,
+                        Name = "Jay Jay the Jet Plane"
+                    }
+                }.Initializer
             }
         };
 
-        using (apiClient.WithPartialAttributeSerialization<CreateAirplaneRequestDocument, AttributesInCreateAirplaneRequest>(requestDocument1,
-            airplane => airplane.AirtimeInHours))
-        {
-            _ = await ApiResponse.TranslateAsync(async () => await apiClient.PostAirplaneAsync(null, requestDocument1));
-        }
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PostAirplaneAsync(null, requestDocument1));
 
         const string airplaneId = "DJy1u";
 
@@ -355,21 +419,21 @@ public sealed class PartialAttributeSerializationLifetimeTests
             Data = new DataInUpdateAirplaneRequest
             {
                 Id = airplaneId,
-                Attributes = new AttributesInUpdateAirplaneRequest
+                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
                 {
-                    ManufacturedInCity = "Everett"
-                }
+                    Initializer =
+                    {
+                        SerialNumber = null,
+                        ManufacturedInCity = "Everett"
+                    }
+                }.Initializer
             }
         };
 
         wrapper.ChangeResponse(HttpStatusCode.NoContent, null);
 
-        using (apiClient.WithPartialAttributeSerialization<UpdateAirplaneRequestDocument, AttributesInUpdateAirplaneRequest>(requestDocument2,
-            airplane => airplane.SerialNumber))
-        {
-            // Act
-            _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId, null, requestDocument2));
-        }
+        // Act
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId, null, requestDocument2));
 
         // Assert
         wrapper.RequestBody.Should().BeJson($$"""
@@ -378,6 +442,7 @@ public sealed class PartialAttributeSerializationLifetimeTests
                 "type": "airplanes",
                 "id": "{{airplaneId}}",
                 "attributes": {
+                  "openapi:discriminator": "airplanes",
                   "serial-number": null,
                   "manufactured-in-city": "Everett"
                 }
@@ -400,7 +465,13 @@ public sealed class PartialAttributeSerializationLifetimeTests
             Data = new DataInUpdateAirplaneRequest
             {
                 Id = airplaneId1,
-                Attributes = new AttributesInUpdateAirplaneRequest()
+                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
+                {
+                    Initializer =
+                    {
+                        SerialNumber = null
+                    }
+                }.Initializer
             }
         };
 
@@ -411,20 +482,19 @@ public sealed class PartialAttributeSerializationLifetimeTests
             Data = new DataInUpdateAirplaneRequest
             {
                 Id = airplaneId2,
-                Attributes = new AttributesInUpdateAirplaneRequest()
+                Attributes = new TrackChangesFor<AttributesInUpdateAirplaneRequest>(apiClient)
+                {
+                    Initializer =
+                    {
+                        IsInMaintenance = false,
+                        AirtimeInHours = null
+                    }
+                }.Initializer
             }
         };
 
-        using (apiClient.WithPartialAttributeSerialization<UpdateAirplaneRequestDocument, AttributesInUpdateAirplaneRequest>(requestDocument1,
-            airplane => airplane.SerialNumber))
-        {
-            using (apiClient.WithPartialAttributeSerialization<UpdateAirplaneRequestDocument, AttributesInUpdateAirplaneRequest>(requestDocument2,
-                airplane => airplane.IsInMaintenance, airplane => airplane.AirtimeInHours))
-            {
-                // Act
-                _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId2, null, requestDocument2));
-            }
-        }
+        // Act
+        _ = await ApiResponse.TranslateAsync(async () => await apiClient.PatchAirplaneAsync(airplaneId2, null, requestDocument2));
 
         // Assert
         wrapper.RequestBody.Should().BeJson($$"""
@@ -433,11 +503,12 @@ public sealed class PartialAttributeSerializationLifetimeTests
                 "type": "airplanes",
                 "id": "{{airplaneId2}}",
                 "attributes": {
+                  "openapi:discriminator": "airplanes",
                   "airtime-in-hours": null,
                   "is-in-maintenance": false
                 }
               }
             }
             """);
-    }*/
+    }
 }

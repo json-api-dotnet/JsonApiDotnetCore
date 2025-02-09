@@ -26,9 +26,9 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
             //ApiResponse<PersonCollectionResponseDocument?> getResponseAgain = await GetPeopleAsync(_apiClient, queryString, eTag, stoppingToken);
             //PeopleMessageFormatter.PrintPeople(getResponseAgain);
 
-            //await UpdatePersonAsync(stoppingToken);
+            await UpdatePersonAsync(stoppingToken);
 
-            await SendOperationsRequestAsync(stoppingToken);
+            //await SendOperationsRequestAsync(stoppingToken);
 
             //_ = await _apiClient.GetPersonAsync("999999", null, null, stoppingToken);
         }
@@ -72,7 +72,7 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
         _ = await ApiResponse.TranslateAsync(async () =>
             await _apiClient.PatchPersonAsync(updatePersonRequest.Data.Id, updatePersonRequest, cancellationToken: cancellationToken));
 
-        _apiClient.ClearTracked();
+        _apiClient.ClearAllTracked();
 
         var response = await _apiClient.GetPersonAsync(updatePersonRequest.Data.Id, cancellationToken: cancellationToken);
 
@@ -223,6 +223,6 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
         //var newTodoItem = (TodoItemDataInResponse)operationsResponse.Result.Atomic_results.ElementAt(3).Data!;
         //Console.WriteLine($"Created todo-item with ID {newTodoItem.Id}: {newTodoItem.Attributes!.Description}.");
 
-        _apiClient.ClearTracked();
+        _apiClient.ClearAllTracked();
     }
 }
