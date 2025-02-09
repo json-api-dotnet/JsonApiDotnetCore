@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace OpenApiNSwagClientTests.LegacyOpenApi.GeneratedCode;
 
-internal partial class LegacyClient : JsonApiClient
+internal partial class LegacyClient : NewJsonApiClient
 {
     partial void Initialize()
     {

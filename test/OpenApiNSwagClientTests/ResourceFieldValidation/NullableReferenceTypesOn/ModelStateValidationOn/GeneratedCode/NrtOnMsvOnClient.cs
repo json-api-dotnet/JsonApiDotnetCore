@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace OpenApiNSwagClientTests.ResourceFieldValidation.NullableReferenceTypesOn.ModelStateValidationOn.GeneratedCode;
 
-internal partial class NrtOnMsvOnClient : JsonApiClient
+internal partial class NrtOnMsvOnClient : NewJsonApiClient
 {
     partial void Initialize()
     {

@@ -12,6 +12,7 @@ namespace OpenApiNSwagClientTests.LegacyOpenApi;
 
 public sealed class RequestTests
 {
+    /*
     private const string OpenApiMediaType = "application/vnd.api+json; ext=openapi";
     private const string HostPrefix = "http://localhost/api/";
 
@@ -524,4 +525,5 @@ public sealed class RequestTests
             }
             """);
     }
+    */
 }

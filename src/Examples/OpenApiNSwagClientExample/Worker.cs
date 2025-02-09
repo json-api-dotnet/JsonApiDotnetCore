@@ -103,6 +103,19 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
                 {
                     Data = new DataInCreatePersonRequest
                     {
+                        Lid = "new-person-0",
+                        // NOT sending "firstName: null" in this operation.
+                        Attributes = new()
+                        {
+                            //FirstName = null,
+                            LastName = "Cinderella0"
+                        }
+                    }
+                },
+                new CreatePersonOperation
+                {
+                    Data = new DataInCreatePersonRequest
+                    {
                         Lid = "new-person-1",
                         // This line results in sending "firstName: null" instead of omitting it.
                         Attributes = new TrackChangesFor<AttributesInCreatePersonRequest>(_apiClient)
@@ -110,7 +123,7 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
                             Initializer =
                             {
                                 FirstName = null,
-                                LastName = "Cinderella"
+                                LastName = "Cinderella1"
                             }
                         }.Initializer
                     }

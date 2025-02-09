@@ -8,10 +8,9 @@ namespace JsonApiDotNetCore.OpenApi.Client.NSwag;
 public abstract class NewJsonApiClient
 {
     private readonly Dictionary<INotifyPropertyChanged, ISet<string>> _propertyStore = [];
-    private JsonSerializer? _alternateSerializer;
 
     public bool AutoClearTracked { get; set; } = true;
-    public bool LogToConsole { get; set; }
+    public bool LogToConsole { get; set; } // TODO: Revisit logging (output type, usages)
 
     internal void Track<T>(T container)
         where T : INotifyPropertyChanged, new()
@@ -19,22 +18,38 @@ public abstract class NewJsonApiClient
         container.PropertyChanged += ContainerOnPropertyChanged;
     }
 
+    public void MarkAsTracked(INotifyPropertyChanged container, params string[] propertyNames)
+    {
+        ArgumentNullException.ThrowIfNull(container);
+        ArgumentNullException.ThrowIfNull(propertyNames);
+
+        if (!_propertyStore.TryGetValue(container, out ISet<string>? properties))
+        {
+            if (LogToConsole)
+            {
+                Console.WriteLine($"Tracking instance of type {container.GetType().Name}.");
+            }
+
+            properties = new HashSet<string>();
+            _propertyStore[container] = properties;
+        }
+
+        foreach (string propertyName in propertyNames)
+        {
+            if (LogToConsole)
+            {
+                Console.WriteLine($"Tracking property {propertyName} on instance of type {container.GetType().Name}.");
+            }
+
+            properties.Add(propertyName);
+        }
+    }
+
     private void ContainerOnPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (sender is INotifyPropertyChanged container && args.PropertyName != null)
         {
-            if (!_propertyStore.TryGetValue(container, out ISet<string>? properties))
-            {
-                properties = new HashSet<string>();
-                _propertyStore[container] = properties;
-            }
-
-            if (LogToConsole)
-            {
-                Console.WriteLine($"Tracking property {args.PropertyName} on instance of type {sender.GetType().Name}.");
-            }
-
-            properties.Add(args.PropertyName);
+            MarkAsTracked(container, args.PropertyName);
         }
     }
 
@@ -53,7 +68,7 @@ public abstract class NewJsonApiClient
         _propertyStore.Clear();
     }
 
-    private void RemoveContainer(INotifyPropertyChanged container)
+    public void RemoveContainer(INotifyPropertyChanged container)
     {
         if (LogToConsole)
         {
@@ -77,98 +92,128 @@ public abstract class NewJsonApiClient
         // Delegating to the existing serializer fails with "Self referencing loop detected" (we are already in too deep), which is why
         // we use a second serializer instance to handle that case.
 
-        _alternateSerializer = JsonSerializer.Create(new JsonSerializerSettings(serializerSettings));
-        serializerSettings.ContractResolver = new JsonApiFieldContractResolver(this);
+        serializerSettings.ContractResolver = new IgnoreJsonInheritanceConverterAttributeContractResolver();
+        serializerSettings.Converters.Add(new OtherConverter(this));
     }
 
-    private sealed class JsonApiFieldContractResolver : DefaultContractResolver
+    private class IgnoreJsonInheritanceConverterAttributeContractResolver : DefaultContractResolver
     {
-        private readonly NewJsonApiClient _apiClient;
-
-        public JsonApiFieldContractResolver(NewJsonApiClient apiClient)
+        protected override JsonObjectContract CreateObjectContract(Type objectType)
         {
-            ArgumentNullException.ThrowIfNull(apiClient);
+            JsonObjectContract contract = base.CreateObjectContract(objectType);
 
-            _apiClient = apiClient;
-        }
-
-        protected override JsonConverter? ResolveContractConverter(Type objectType)
-        {
-            bool isTrackedType = _apiClient._propertyStore.Keys.Any(containingType => containingType.GetType() == objectType);
-
-            if (isTrackedType && _apiClient.LogToConsole)
+            if (contract.Converter != null && contract.Converter.GetType().Name == "JsonInheritanceConverter")
             {
-                Console.WriteLine($"{nameof(JsonApiFieldContractResolver)}.{nameof(ResolveContractConverter)} for type {objectType.Name} (tracked)");
+                contract.Converter = null;
             }
 
-            return isTrackedType ? new PropertyTrackingWriteConverter(_apiClient) : base.ResolveContractConverter(objectType);
+            return contract;
         }
     }
 
-    private sealed class PropertyTrackingWriteConverter : JsonConverter
+    private sealed class TrackingContractResolver : InsertDiscriminatorPropertyContractResolver
     {
+        private readonly INotifyPropertyChanged _container;
+        private readonly ISet<string> _properties;
+
+        public TrackingContractResolver(INotifyPropertyChanged container, ISet<string> properties)
+        {
+            ArgumentNullException.ThrowIfNull(container);
+            ArgumentNullException.ThrowIfNull(properties);
+
+            _container = container;
+            _properties = properties;
+        }
+
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+        {
+            JsonProperty jsonProperty = base.CreateProperty(member, memberSerialization);
+
+            // TODO: Only at this type, or whole subtree of objects?
+            if (jsonProperty.DeclaringType == _container.GetType())
+            {
+                if (_properties.Contains(jsonProperty.UnderlyingName!))
+                {
+                    jsonProperty.NullValueHandling = NullValueHandling.Include;
+                    jsonProperty.DefaultValueHandling = DefaultValueHandling.Include;
+                }
+                else
+                {
+                    jsonProperty.NullValueHandling = NullValueHandling.Ignore;
+                    jsonProperty.DefaultValueHandling = DefaultValueHandling.Ignore;
+                }
+            }
+
+            return jsonProperty;
+        }
+    }
+
+    private sealed class OtherConverter : JsonConverter
+    {
+        private readonly DefaultContractResolver _defaultContractResolver = new();
+        private readonly NewJsonApiClient _apiClient;
+
+        // TODO: Think more about thread safety, such as switching contract resolvers.
         [ThreadStatic]
         private static bool _isWriting;
 
-        private readonly NewJsonApiClient _apiClient;
-
         public override bool CanRead => false;
-        public override bool CanWrite => true;
 
-        public PropertyTrackingWriteConverter(NewJsonApiClient apiClient)
+        public override bool CanWrite
+        {
+            get
+            {
+                if (_isWriting)
+                {
+                    _isWriting = false;
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        public OtherConverter(NewJsonApiClient apiClient)
         {
             ArgumentNullException.ThrowIfNull(apiClient);
 
             _apiClient = apiClient;
         }
 
+        // Called BEFORE CanRead/CanWrite.
         public override bool CanConvert(Type objectType)
         {
-            if (_isWriting)
-            {
-                if (_apiClient.LogToConsole)
-                {
-                    Console.WriteLine($"{nameof(PropertyTrackingWriteConverter)}.{nameof(CanConvert)} returns false (already writing).");
-                }
+            bool isTrackedType = _apiClient._propertyStore.Keys.Any(containingType => containingType.GetType() == objectType);
 
-                return false;
+            if (isTrackedType)
+            {
+                return true;
             }
 
-            return true;
-        }
+            string? discriminatorName = GetDiscriminatorName(objectType);
+            bool requiresDiscriminator = discriminatorName != null && discriminatorName != "openapi:discriminator";
 
-        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
-        {
-            throw new NotSupportedException();
+            if (requiresDiscriminator)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
+            IContractResolver backupContractResolver = serializer.ContractResolver;
+            _isWriting = true;
+
             try
             {
-                _isWriting = true;
-
                 if (value is INotifyPropertyChanged container && _apiClient._propertyStore.TryGetValue(container, out ISet<string>? properties))
                 {
-                    if (_apiClient.LogToConsole)
-                    {
-                        Console.WriteLine($"Writing tracked properties for instance of type {container.GetType().Name}.");
-                    }
+                    AssertRequiredAttributesHaveNonDefaultValues(container, properties, writer.Path);
 
-                    writer.WriteStartObject();
-
-                    foreach (string propertyName in properties)
-                    {
-                        PropertyInfo property = container.GetType().GetProperty(propertyName)!;
-
-                        string jsonPropertyName = property.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? property.Name;
-                        writer.WritePropertyName(jsonPropertyName);
-
-                        object? jsonPropertyValue = property.GetValue(container);
-                        serializer.Serialize(writer, jsonPropertyValue);
-                    }
-
-                    writer.WriteEndObject();
+                    serializer.ContractResolver = new TrackingContractResolver(container, properties);
+                    serializer.Serialize(writer, value);
 
                     if (_apiClient.AutoClearTracked)
                     {
@@ -177,17 +222,173 @@ public abstract class NewJsonApiClient
                 }
                 else
                 {
-                    if (_apiClient.LogToConsole)
-                    {
-                        Console.WriteLine($"Type {value?.GetType().Name} is tracked, but this instance is not. Delegating to alternate serializer.");
-                    }
-
-                    _apiClient._alternateSerializer!.Serialize(writer, value);
+                    serializer.ContractResolver = new InsertDiscriminatorPropertyContractResolver();
+                    serializer.Serialize(writer, value);
                 }
             }
             finally
             {
                 _isWriting = false;
+                serializer.ContractResolver = backupContractResolver;
+            }
+        }
+
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        {
+            // TODO: Implement reading
+            throw new NotImplementedException();
+        }
+
+        private string? GetDiscriminatorName(Type objectType)
+        {
+            JsonContract contract = _defaultContractResolver.ResolveContract(objectType);
+
+            if (contract.Converter != null && contract.Converter.GetType().Name == "JsonInheritanceConverter")
+            {
+                var inheritanceConverter = (BlockedJsonInheritanceConverter)contract.Converter;
+                return inheritanceConverter.DiscriminatorName;
+            }
+
+            return null;
+        }
+
+        private void AssertRequiredAttributesHaveNonDefaultValues(object container, ISet<string> properties, string jsonPath)
+        {
+            foreach (PropertyInfo propertyInfo in container.GetType().GetProperties())
+            {
+                bool isTracked = properties.Contains(propertyInfo.Name);
+
+                if (!isTracked)
+                {
+                    AssertPropertyHasNonDefaultValueIfRequired(container, propertyInfo, jsonPath);
+                }
+            }
+        }
+
+        private static void AssertPropertyHasNonDefaultValueIfRequired(object attributesObject, PropertyInfo propertyInfo, string jsonPath)
+        {
+            var jsonProperty = propertyInfo.GetCustomAttribute<JsonPropertyAttribute>();
+
+            if (jsonProperty is { Required: Required.Always or Required.AllowNull })
+            {
+                bool propertyHasDefaultValue = PropertyHasDefaultValue(propertyInfo, attributesObject);
+
+                if (propertyHasDefaultValue)
+                {
+                    throw new JsonSerializationException(
+                        $"Cannot write a default value for property '{jsonProperty.PropertyName}'. Property requires a non-default value. Path '{jsonPath}'.",
+                        jsonPath, 0, 0, null);
+                }
+            }
+        }
+
+        private static bool PropertyHasDefaultValue(PropertyInfo propertyInfo, object instance)
+        {
+            object? propertyValue = propertyInfo.GetValue(instance);
+            object? defaultValue = GetDefaultValue(propertyInfo.PropertyType);
+
+            return EqualityComparer<object>.Default.Equals(propertyValue, defaultValue);
+        }
+
+        private static object? GetDefaultValue(Type type)
+        {
+            return type.IsValueType ? Activator.CreateInstance(type) : null;
+        }
+    }
+
+    private class InsertDiscriminatorPropertyContractResolver : IgnoreJsonInheritanceConverterAttributeContractResolver
+    {
+        private readonly DefaultContractResolver _defaultContractResolver = new();
+
+        protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+        {
+            IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
+
+            string? discriminatorName = GetDiscriminatorName(type);
+
+            if (discriminatorName != null)
+            {
+                JsonProperty discriminatorProperty = CreateDiscriminatorProperty(discriminatorName, type);
+                properties.Insert(0, discriminatorProperty);
+            }
+
+            return properties;
+        }
+
+        private string? GetDiscriminatorName(Type objectType)
+        {
+            JsonContract contract = _defaultContractResolver.ResolveContract(objectType);
+
+            if (contract.Converter != null && contract.Converter.GetType().Name == "JsonInheritanceConverter")
+            {
+                var inheritanceConverter = (BlockedJsonInheritanceConverter)contract.Converter;
+                return inheritanceConverter.DiscriminatorName;
+            }
+
+            return null;
+        }
+
+        private static JsonProperty CreateDiscriminatorProperty(string discriminatorName, Type declaringType)
+        {
+            return new JsonProperty
+            {
+                PropertyName = discriminatorName,
+                PropertyType = typeof(string),
+                DeclaringType = declaringType,
+                ValueProvider = new DiscriminatorValueProvider(),
+                AttributeProvider = null,
+                Readable = true,
+                Writable = true,
+                ShouldSerialize = _ => true
+            };
+        }
+
+        private sealed class DiscriminatorValueProvider : IValueProvider
+        {
+            public object? GetValue(object target)
+            {
+                Type type = target.GetType();
+
+                foreach (Attribute attribute in type.GetCustomAttributes<Attribute>(true))
+                {
+                    var shim = JsonInheritanceAttributeShim.TryCreate(attribute);
+
+                    if (shim != null && shim.Type == type)
+                    {
+                        return shim.Key;
+                    }
+                }
+
+                return null;
+            }
+
+            public void SetValue(object target, object? value)
+            {
+            }
+        }
+
+        private sealed class JsonInheritanceAttributeShim
+        {
+            private readonly Attribute _instance;
+            private readonly PropertyInfo _keyProperty;
+            private readonly PropertyInfo _typeProperty;
+
+            public string Key => (string)_keyProperty.GetValue(_instance)!;
+            public Type Type => (Type)_typeProperty.GetValue(_instance)!;
+
+            private JsonInheritanceAttributeShim(Attribute instance, Type type)
+            {
+                _instance = instance;
+                _keyProperty = type.GetProperty("Key") ?? throw new ArgumentException("Key property not found.", nameof(instance));
+                _typeProperty = type.GetProperty("Type") ?? throw new ArgumentException("Type property not found.", nameof(instance));
+            }
+
+            public static JsonInheritanceAttributeShim? TryCreate(Attribute attribute)
+            {
+                ArgumentNullException.ThrowIfNull(attribute);
+
+                Type type = attribute.GetType();
+                return type.Name == "JsonInheritanceAttribute" ? new JsonInheritanceAttributeShim(attribute, type) : null;
             }
         }
     }
