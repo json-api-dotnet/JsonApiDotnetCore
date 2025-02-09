@@ -72,7 +72,7 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
         _ = await ApiResponse.TranslateAsync(async () =>
             await _apiClient.PatchPersonAsync(updatePersonRequest.Data.Id, updatePersonRequest, cancellationToken: cancellationToken));
 
-        _apiClient.Reset();
+        _apiClient.ClearTracked();
 
         var response = await _apiClient.GetPersonAsync(updatePersonRequest.Data.Id, cancellationToken: cancellationToken);
 
@@ -103,7 +103,7 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
                 {
                     Data = new DataInCreatePersonRequest
                     {
-                        Lid = "new-person",
+                        Lid = "new-person-1",
                         // This line results in sending "firstName: null" instead of omitting it.
                         Attributes = new TrackChangesFor<AttributesInCreatePersonRequest>(_apiClient)
                         {
@@ -128,6 +128,36 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
                         }
                     }
                 },
+                new CreatePersonOperation
+                {
+                    Data = new DataInCreatePersonRequest
+                    {
+                        Lid = "new-person-3",
+                        // This line results in sending "firstName: null" instead of omitting it.
+                        Attributes = new TrackChangesFor<AttributesInCreatePersonRequest>(_apiClient)
+                        {
+                            Initializer =
+                            {
+                                FirstName = null,
+                                LastName = "Cinderella3"
+                            }
+                        }.Initializer
+                    }
+                },
+                new CreatePersonOperation
+                {
+                    Data = new DataInCreatePersonRequest
+                    {
+                        Lid = "new-person-4",
+                        // NOT sending "firstName: null" in this operation.
+                        Attributes = new()
+                        {
+                            //FirstName = null,
+                            LastName = "Cinderella4"
+                        }
+                    }
+                },
+                /*
                 new CreateTodoItemOperation
                 {
                     Data = new DataInCreateTodoItemRequest
@@ -171,14 +201,15 @@ public sealed class Worker(ExampleApiClient apiClient, IHostApplicationLifetime 
                         Lid = "new-person"
                     }
                 }
+                */
             ]
         };
 
         ApiResponse<OperationsResponseDocument> operationsResponse = await _apiClient.PostOperationsAsync(operationsRequest, cancellationToken);
 
-        var newTodoItem = (TodoItemDataInResponse)operationsResponse.Result.Atomic_results.ElementAt(3).Data!;
-        Console.WriteLine($"Created todo-item with ID {newTodoItem.Id}: {newTodoItem.Attributes!.Description}.");
+        //var newTodoItem = (TodoItemDataInResponse)operationsResponse.Result.Atomic_results.ElementAt(3).Data!;
+        //Console.WriteLine($"Created todo-item with ID {newTodoItem.Id}: {newTodoItem.Attributes!.Description}.");
 
-        _apiClient.Reset();
+        _apiClient.ClearTracked();
     }
 }
