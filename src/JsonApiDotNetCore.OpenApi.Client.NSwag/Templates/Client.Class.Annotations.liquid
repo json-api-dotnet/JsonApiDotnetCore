@@ -1,0 +1,14 @@
+partial class {{ Class }} : NewJsonApiClient
+{
+    partial void Initialize()
+    {
+        _instanceSettings = new Newtonsoft.Json.JsonSerializerSettings(_settings.Value)
+        {
+#if DEBUG
+            Formatting = Newtonsoft.Json.Formatting.Indented
+#endif
+        };
+
+        SetSerializerSettingsForJsonApi(_instanceSettings);
+    }
+}
