@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace JsonApiDotNetCore.OpenApi.Client.NSwag;
@@ -98,7 +99,8 @@ public abstract class NewJsonApiClient
         ArgumentNullException.ThrowIfNull(serializerSettings);
 
         serializerSettings.ContractResolver = new InsertDiscriminatorPropertyContractResolver();
-        serializerSettings.Converters.Add(new PropertyTrackingConverter(this));
+        serializerSettings.Converters.Add(new PropertyTrackingWriteConverter(this));
+        serializerSettings.Converters.Add(new JsonInheritanceReadConverter());
     }
 
     private static string? GetDiscriminatorName(Type objectType)
@@ -186,46 +188,13 @@ public abstract class NewJsonApiClient
             {
                 // Nothing to do, NSwag doesn't generate a property for the discriminator.
             }
-
-            private sealed class JsonInheritanceAttributeShim
-            {
-                private readonly Attribute _instance;
-                private readonly PropertyInfo _keyProperty;
-                private readonly PropertyInfo _typeProperty;
-
-                public string Key => (string)_keyProperty.GetValue(_instance)!;
-                public Type Type => (Type)_typeProperty.GetValue(_instance)!;
-
-                private JsonInheritanceAttributeShim(Attribute instance, Type type)
-                {
-                    _instance = instance;
-                    _keyProperty = type.GetProperty("Key") ?? throw new ArgumentException("Key property not found.", nameof(instance));
-                    _typeProperty = type.GetProperty("Type") ?? throw new ArgumentException("Type property not found.", nameof(instance));
-                }
-
-                public static JsonInheritanceAttributeShim? TryCreate(Attribute attribute)
-                {
-                    ArgumentNullException.ThrowIfNull(attribute);
-
-                    Type type = attribute.GetType();
-                    return type.Name == "JsonInheritanceAttribute" ? new JsonInheritanceAttributeShim(attribute, type) : null;
-                }
-            }
         }
     }
 
-    /// <summary>
-    /// Provides support for partial POST/PATCH in JSON:API requests via tracked properties.
-    /// </summary>
-    private sealed class PropertyTrackingConverter : JsonConverter
+    private sealed class JsonInheritanceReadConverter : JsonConverter
     {
         [ThreadStatic]
         private static bool _isReading;
-
-        [ThreadStatic]
-        private static bool _isWriting;
-
-        private readonly NewJsonApiClient _apiClient;
 
         public override bool CanRead
         {
@@ -242,6 +211,81 @@ public abstract class NewJsonApiClient
             }
         }
 
+        public override bool CanWrite => false;
+
+        public override bool CanConvert(Type objectType)
+        {
+            var converterAttribute = objectType.GetCustomAttribute<JsonConverterAttribute>(true);
+            return converterAttribute is { ConverterType.Name: GeneratedJsonInheritanceConverterName };
+        }
+
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        {
+            _isReading = true;
+
+            try
+            {
+                JToken token = JToken.ReadFrom(reader);
+                string? discriminatorValue = GetDiscriminatorValue(objectType, token);
+
+                Type resolvedType = ResolveTypeFromDiscriminatorValue(objectType, discriminatorValue);
+                return token.ToObject(resolvedType, serializer);
+            }
+            finally
+            {
+                _isReading = false;
+            }
+        }
+
+        private static string? GetDiscriminatorValue(Type objectType, JToken token)
+        {
+            var jsonConverterAttribute = objectType.GetCustomAttribute<JsonConverterAttribute>(true)!;
+
+            if (jsonConverterAttribute.ConverterParameters is not [string])
+            {
+                throw new JsonException($"Expected single 'type' parameter for JsonInheritanceConverter usage on type '{objectType}'.");
+            }
+
+            string discriminatorName = (string)jsonConverterAttribute.ConverterParameters[0];
+            return token.Children<JProperty>().FirstOrDefault(property => property.Name == discriminatorName)?.Value.ToString();
+        }
+
+        private static Type ResolveTypeFromDiscriminatorValue(Type objectType, string? discriminatorValue)
+        {
+            if (discriminatorValue != null)
+            {
+                foreach (Attribute attribute in objectType.GetCustomAttributes<Attribute>(true))
+                {
+                    var shim = JsonInheritanceAttributeShim.TryCreate(attribute);
+
+                    if (shim != null && shim.Key == discriminatorValue)
+                    {
+                        return shim.Type;
+                    }
+                }
+            }
+
+            return objectType;
+        }
+
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    /// <summary>
+    /// Provides support for partial POST/PATCH in JSON:API requests via tracked properties.
+    /// </summary>
+    private sealed class PropertyTrackingWriteConverter : JsonConverter
+    {
+        [ThreadStatic]
+        private static bool _isWriting;
+
+        private readonly NewJsonApiClient _apiClient;
+
+        public override bool CanRead => false;
+
         public override bool CanWrite
         {
             get
@@ -257,7 +301,7 @@ public abstract class NewJsonApiClient
             }
         }
 
-        public PropertyTrackingConverter(NewJsonApiClient apiClient)
+        public PropertyTrackingWriteConverter(NewJsonApiClient apiClient)
         {
             ArgumentNullException.ThrowIfNull(apiClient);
 
@@ -270,11 +314,9 @@ public abstract class NewJsonApiClient
             return _apiClient._propertyStore.Keys.Any(containingType => containingType.GetType() == objectType);
         }
 
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
-            // TODO: Implement reading...
-            // https://github.com/RicoSuter/NJsonSchema/blob/master/src/NJsonSchema.NewtonsoftJson/Converters/JsonInheritanceConverter.cs
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
@@ -397,6 +439,31 @@ public abstract class NewJsonApiClient
             }
 
             return jsonProperty;
+        }
+    }
+
+    private sealed class JsonInheritanceAttributeShim
+    {
+        private readonly Attribute _instance;
+        private readonly PropertyInfo _keyProperty;
+        private readonly PropertyInfo _typeProperty;
+
+        public string Key => (string)_keyProperty.GetValue(_instance)!;
+        public Type Type => (Type)_typeProperty.GetValue(_instance)!;
+
+        private JsonInheritanceAttributeShim(Attribute instance, Type type)
+        {
+            _instance = instance;
+            _keyProperty = type.GetProperty("Key") ?? throw new ArgumentException("Key property not found.", nameof(instance));
+            _typeProperty = type.GetProperty("Type") ?? throw new ArgumentException("Type property not found.", nameof(instance));
+        }
+
+        public static JsonInheritanceAttributeShim? TryCreate(Attribute attribute)
+        {
+            ArgumentNullException.ThrowIfNull(attribute);
+
+            Type type = attribute.GetType();
+            return type.Name == "JsonInheritanceAttribute" ? new JsonInheritanceAttributeShim(attribute, type) : null;
         }
     }
 }
